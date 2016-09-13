@@ -17,6 +17,20 @@ I ran through the basic tutorials [here](http://docs.spacebrew.cc/tutorials/2015
 
 After having it all linked up, you are now able to control your Processing app through the web, or through another Processing app. It seems like voodoo magic (yes, websockets are like voodoo magic). 
 
+I think I've had enough of playing around with WebSockets today. I am going to look at a few frontend GUI's for Processing. I was inspired by Professor Moon's use in his [Thread Screen](https://www.youtube.com/watch?v=dvDHNDkO-Qo) project written in OpenFrameworks. I am trying to find a similar library to ofxGUI.
+
+It looks like [ControlP5](https://github.com/sojamo/controlp5) can do the trick, the modules look [sleek](http://wiki.unity3d.com/images/8/87/ControlP5.png).
+
+Got sidetracked a little bit ... read into Processing in Eclipse and I think it is very useful for the size of application we are building here. It seems as if the Processing editor is well-suited for building smaller sketches, not full-scale applications. Furthermore, doing OOP in Processing is a bit weird as all classes are treated as "inner classes," which extend PApplet. I can call rect() and draw onto the main window in any class in Processing -- seems messy and easy to lose control with lots of classes (also what about utility classes that are not used for drawing?). Anyways, I think I will run through the tutorial to use Eclipse (I think it will save me time in the long run). Basically, we are going to strip away from using the Processing IDE and what it does for us in the background. I can actually take this time to learn more Java syntax.
+
+
+
+
+
+
+
+
+
 https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API
 
 
