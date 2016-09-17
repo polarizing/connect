@@ -10,7 +10,7 @@ import java.awt.event.*;
  *
  */
 
-public class ConnectIO extends PApplet{
+public class ConnectServer extends PApplet{
 	
 	/** ConnectIO Instance Variables **/
 	private int frameCount;
@@ -20,7 +20,7 @@ public class ConnectIO extends PApplet{
 	private ConnectGUIManager gui;
 	
 	/** Constructor to setup the application. */
-	public ConnectIO() {
+	public ConnectServer() {
 		this.frameCount = 0;
 		this.numClients = 4;
 		this.clients = new Client[this.numClients];
@@ -89,7 +89,7 @@ public class ConnectIO extends PApplet{
 	 */
 	
 	public static void main(String[] args) {
-		PApplet.main(new String[] {"ConnectIO"});
+		PApplet.main(new String[] {"ConnectServer"});
 	}
 	
 	
