@@ -11,15 +11,30 @@ import processing.core.PVector;
 public class Trigger {
 	
 	private PApplet parent;
+	private int id;
+	private PVector pos;
 	
-	public Trigger(PApplet p, int index, PVector pos) {
-		parent = p;
-		this.log("Trigger initialized");
+	public Trigger(PApplet p, int id, PVector pos) {
+		this.parent = p;
+		this.id = id;
+		this.pos = pos;
+//		this.log("Trigger initialized");
+	}
+	
+	/**
+	 * Draws the trigger on the canvas.
+	 */
+	public void draw () {
+		this.parent.ellipse(this.pos.x, this.pos.y, 50, 50);
+	}
+	
+	public int getId() {
+		return this.id;
 	}
 	
 	public void log (String msg) {
-		parent.print("From the Trigger Class: ");
-		parent.println(msg);
+		this.parent.print("From the Trigger Class: ");
+		this.parent.println(msg);
 	}
 	
 	public String toString() {

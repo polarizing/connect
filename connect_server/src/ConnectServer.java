@@ -1,4 +1,8 @@
 import processing.core.PApplet;
+import processing.core.PVector;
+
+import java.util.List;
+import java.util.ArrayList;
 
 // Used to detect frame resize event.
 import java.awt.event.*;
@@ -13,17 +17,17 @@ import java.awt.event.*;
 public class ConnectServer extends PApplet{
 	
 	/** ConnectIO Instance Variables **/
-	private int frameCount;
 	private int numClients;
-	private Client[] clients;
-	private int sliderValue = 100;
+	private List<Client> clients;
+	private List<Trigger> triggers;
 	private ConnectGUIManager gui;
+	private GridHelper grid;
 	
 	/** Constructor to setup the application. */
 	public ConnectServer() {
-		this.frameCount = 0;
 		this.numClients = 4;
-		this.clients = new Client[this.numClients];
+		this.clients = new ArrayList<Client>();
+		this.triggers = new ArrayList<Trigger>();
 		print ("Starting ConnectIO application ...");
 	}
 	
@@ -33,7 +37,7 @@ public class ConnectServer extends PApplet{
 	 */
 	public void settings() {
 		print ("\nSettings called.\n");
-		size(640, 360);
+		size(900, 600);
 	// fullScreen();
 	}
 
@@ -42,38 +46,79 @@ public class ConnectServer extends PApplet{
 	 * It's used to define initial environment properties such as screen size
 	 * and the initial display.
 	 */
-	
 	public void setup() {
-
-		// Sets window to be resizable.
-		surface.setResizable(true);
-
-		// Initialize all clients
-		for (int i = 0; i < clients.length; i++) {
-			clients[i] = new Client(this);
-		}
+		fill(0, 0, 0);
+		rect(30, 30, 100, 100);
+		// Setup a grid helper.
+		this.grid = new GridHelper(this, 30, 30, 130, 130);
+		// Sets thirty pixels margin to top, left, bottom, and right
+		// Partitions grid into two rows and two columns.
+		this.grid.setOffsets(new int[]{30, 30, 30, 30})
+				.setPartitions(new int[]{4, 2})
+				;
+		this.grid.draw();
+		println(this.grid.getPartitionPoints());
 		
-//		// Initialize all triggers
-//		for (int i = 0; i < clients.length; i++) {
-//			
-//		}
+		// Sets window to be resizable.
+		this.surface.setResizable(true);
 		
 		// Initialize GUI
-		gui = new ConnectGUIManager(this);
+		this.gui = new ConnectGUIManager(this);
 		
-//		  cp5.addSlider("numClients")
-//		     .setPosition(100,50)
-//		     .setRange(0,255)
-//		     ;
+		// Initialize all clients
+		for (int i = 0; i < this.numClients; i++) {
+			this.clients.add(new Client(this, i));
+		}
 		
+		// Initialize all triggers
+		for (int clientId = 0, triggerId = 0; clientId < this.numClients; clientId++) {
+			Client client = this.clients.get(clientId);
+			int numTriggers = client.getNumTriggers();
+			for (int i = 0; i < numTriggers; i++) {
+				PVector pos = new PVector(100, 100);
+				Trigger t = new Trigger(this, triggerId, pos);
+				// These should point to the same trigger object (pass-by-reference).
+				// Add trigger to list of all triggers.
+				this.triggers.add(t);
+				// Add trigger to client's trigger list.
+				client.addTrigger(t);
+				triggerId++;
+			}
+		}
 		print ("Setup called.\n");
-		
-		
+		frameRate(120);
 	}
 
 	public void draw() {
-		println(this.numClients);
+		
+//		// Clear canvas on every frame.
+//		background(color(34, 34, 34));
+//		
+//		// Draw initial line in middle of screen.
+//		stroke(45, 45, 45);
+//		strokeWeight(1);
+//		line(0, height / 2, width, height / 2);
+//		
+//		for (Trigger trigger : this.triggers) {
+//			trigger.draw();
+//		}		
+//		
+//		println(width);
+//		// Slower logging (1 sec)
+////		if (frameCount % 30 == 0) {
+////			println("hi");
+////			for (Trigger trigger : this.triggers) {
+////				println(trigger.getId());
+////			}
+////		}
 	}
+	
+	
+	public void mousePressed(){
+		  ellipse( mouseX, mouseY, 2, 2 );
+		
+		  text( "x: " + mouseX + " y: " + mouseY, mouseX + 2, mouseY );
+		}
 	
 	public void initTriggers() {
 		
