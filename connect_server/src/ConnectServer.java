@@ -2,6 +2,9 @@ import processing.core.PApplet;
 import processing.core.PVector;
 
 import java.util.List;
+
+import controlP5.ControlEvent;
+
 import java.util.ArrayList;
 
 // Used to detect frame resize event.
@@ -14,17 +17,32 @@ import java.awt.event.*;
  *
  */
 
+
 public class ConnectServer extends PApplet{
 	
 	/** ConnectIO Instance Variables **/
-	private int numClients;
-	private List<Client> clients;
-	private List<Trigger> triggers;
+	
+	/** Helper Classes **/
 	private ConnectGUIManager gui;
 	private GridHelper grid;
 	
+	/** Grid Variables **/
+	private int numColumns;
+	private int numRows;
+	private int marginOffset;
+	
+	private int numClients;
+	private List<Client> clients;
+	private List<Trigger> triggers;
+	
 	/** Constructor to setup the application. */
 	public ConnectServer() {
+		
+		/** Initialize Grid Variables **/
+		this.numColumns = 2;
+		this.numRows = 2;
+		this.marginOffset = 30;
+		
 		this.numClients = 4;
 		this.clients = new ArrayList<Client>();
 		this.triggers = new ArrayList<Trigger>();
@@ -37,8 +55,8 @@ public class ConnectServer extends PApplet{
 	 */
 	public void settings() {
 		print ("\nSettings called.\n");
-		size(900, 600);
-	// fullScreen();
+//		size(900, 600);
+	 fullScreen();
 	}
 
 	/**
@@ -48,16 +66,7 @@ public class ConnectServer extends PApplet{
 	 */
 	public void setup() {
 		fill(0, 0, 0);
-		rect(30, 30, 100, 100);
-		// Setup a grid helper.
-		this.grid = new GridHelper(this, 30, 30, 130, 130);
-		// Sets thirty pixels margin to top, left, bottom, and right
-		// Partitions grid into two rows and two columns.
-		this.grid.setOffsets(new int[]{30, 30, 30, 30})
-				.setPartitions(new int[]{4, 2})
-				;
-		this.grid.draw();
-		println(this.grid.getPartitionPoints());
+
 		
 		// Sets window to be resizable.
 		this.surface.setResizable(true);
@@ -86,31 +95,44 @@ public class ConnectServer extends PApplet{
 			}
 		}
 		print ("Setup called.\n");
-		frameRate(120);
+		frameRate(30);
 	}
 
 	public void draw() {
-		
 //		// Clear canvas on every frame.
-//		background(color(34, 34, 34));
-//		
-//		// Draw initial line in middle of screen.
-//		stroke(45, 45, 45);
-//		strokeWeight(1);
-//		line(0, height / 2, width, height / 2);
-//		
+		background(color(34, 34, 34));
+
+		// Draw initial line in middle of screen.
+		stroke(45, 45, 45);
+		strokeWeight(1);
+		line(0, height / 2, width, height / 2);
+		
 //		for (Trigger trigger : this.triggers) {
 //			trigger.draw();
 //		}		
 //		
 //		println(width);
-//		// Slower logging (1 sec)
-////		if (frameCount % 30 == 0) {
-////			println("hi");
-////			for (Trigger trigger : this.triggers) {
-////				println(trigger.getId());
-////			}
-////		}
+		
+		// Update the grid helper.
+		// optimize later by calling these
+		// only when numRows or numColumns
+		// get updated
+		for (int i = 0; i < 1; i++) {
+			this.grid = new GridHelper(this, 0, 0, width, height);
+			this.grid.setOffsets(new int[]{marginOffset, marginOffset, marginOffset, marginOffset})
+					.setPartitions(new int[]{numRows, numColumns})
+					.setRectBoundingBox(30, 30, 130, 130)
+					.setRectBoundingBox(0, 0, width, height);
+			this.grid.draw();			
+		}
+
+		
+//		 Slower logging (1 sec)
+		if (frameCount % 30 == 0) {
+			println("Clients = "+this.numClients);
+			println("Rows = "+this.numRows);
+			println("Columns = "+this.numColumns);
+		}
 	}
 	
 	
