@@ -30,6 +30,7 @@ public class ConnectServer extends PApplet{
 	private int numColumns;
 	private int numRows;
 	private int marginOffset;
+	private int rightOffset;
 	
 	private int numClients;
 	private List<Client> clients;
@@ -39,9 +40,10 @@ public class ConnectServer extends PApplet{
 	public ConnectServer() {
 		
 		/** Initialize Grid Variables **/
-		this.numColumns = 2;
+		this.numColumns = 4;
 		this.numRows = 2;
 		this.marginOffset = 30;
+		this.rightOffset = 30;
 		
 		this.numClients = 4;
 		this.clients = new ArrayList<Client>();
@@ -55,8 +57,8 @@ public class ConnectServer extends PApplet{
 	 */
 	public void settings() {
 		print ("\nSettings called.\n");
-//		size(900, 600);
-	 fullScreen();
+		size(900, 600);
+//	 fullScreen();
 	}
 
 	/**
@@ -65,9 +67,7 @@ public class ConnectServer extends PApplet{
 	 * and the initial display.
 	 */
 	public void setup() {
-		fill(0, 0, 0);
 
-		
 		// Sets window to be resizable.
 		this.surface.setResizable(true);
 		
@@ -80,25 +80,27 @@ public class ConnectServer extends PApplet{
 		}
 		
 		// Initialize all triggers
-		for (int clientId = 0, triggerId = 0; clientId < this.numClients; clientId++) {
-			Client client = this.clients.get(clientId);
-			int numTriggers = client.getNumTriggers();
-			for (int i = 0; i < numTriggers; i++) {
-				PVector pos = new PVector(100, 100);
-				Trigger t = new Trigger(this, triggerId, pos);
-				// These should point to the same trigger object (pass-by-reference).
-				// Add trigger to list of all triggers.
-				this.triggers.add(t);
-				// Add trigger to client's trigger list.
-				client.addTrigger(t);
-				triggerId++;
-			}
-		}
+//		for (int clientId = 0, triggerId = 0; clientId < this.numClients; clientId++) {
+//			Client client = this.clients.get(clientId);
+//			int numTriggers = client.getNumTriggers();
+//			for (int i = 0; i < numTriggers; i++) {
+//				PVector pos = new PVector(100, 100);
+//				Trigger t = new Trigger(this, triggerId, pos);
+//				// These should point to the same trigger object (pass-by-reference).
+//				// Add trigger to list of all triggers.
+//				this.triggers.add(t);
+//				// Add trigger to client's trigger list.
+//				client.addTrigger(t);
+//				triggerId++;
+//			}
+//		}
 		print ("Setup called.\n");
 		frameRate(30);
 	}
 
 	public void draw() {
+		println(numColumns);
+
 //		// Clear canvas on every frame.
 		background(color(34, 34, 34));
 
@@ -107,38 +109,58 @@ public class ConnectServer extends PApplet{
 		strokeWeight(1);
 		line(0, height / 2, width, height / 2);
 		
-//		for (Trigger trigger : this.triggers) {
-//			trigger.draw();
-//		}		
-//		
-//		println(width);
-		
-		// Update the grid helper.
-		// optimize later by calling these
-		// only when numRows or numColumns
-		// get updated
-		for (int i = 0; i < 1; i++) {
+		// Update the grid helper. Optimize later.
 			this.grid = new GridHelper(this, 0, 0, width, height);
 			this.grid.setOffsets(new int[]{marginOffset, marginOffset, marginOffset, marginOffset})
-					.setPartitions(new int[]{numRows, numColumns})
-					.setRectBoundingBox(30, 30, 130, 130)
-					.setRectBoundingBox(0, 0, width, height);
-			this.grid.draw();			
-		}
+					.setPartitions(new int[]{numRows, numColumns});
+			this.grid.draw();
+		
+//		ArrayList<PVector> points = this.grid.getMiddlePartitionPoints();
+//		points.add(0, new PVector(this.grid.getLeftMarginX(), this.grid.getMiddleY()));		
+//		points.add(points.size(), new PVector(this.grid.getRightMarginX(), this.grid.getMiddleY()));
+//		
+//		for (PVector point :  points) {
+//			ellipse(point.x, point.y, 15, 15);
+//		}
+//		
+//		for (int i = 0, triggerId = 0; i < this.numClients; i++) {
+//			Client client = this.clients.get(i);
+//			int numTriggers = client.getNumTriggers();
+//			PVector leftPoint = points.get(i);
+//			PVector rightPoint = points.get(i+1);
+//			float yPos = leftPoint.y;
+//			float xPos = leftPoint.x;
+//			float xDist = rightPoint.x - leftPoint.x;
+//			float xInterval = xDist / (numTriggers + 1);
+//
+//			for (int j = 1; j <= numTriggers; j++) {
+//				PVector pos = new PVector( (xInterval * j) + xPos, yPos);
+//				Trigger t = new Trigger(this, triggerId, pos);
+//				t.draw();
+////				this.triggers.add(t);
+////				client.addTrigger(t);
+////				triggerId++;
+//			}
+//		}
 
+//		
+//		for (Trigger t : this.triggers) {
+//			t.draw();
+//		}
 		
 //		 Slower logging (1 sec)
 		if (frameCount % 30 == 0) {
 			println("Clients = "+this.numClients);
 			println("Rows = "+this.numRows);
 			println("Columns = "+this.numColumns);
+//			println(this.grid.getPartitionPoints());
+			println(this.grid.getPartitionPointsWithMargin()); // with margin
 		}
 	}
 	
 	
 	public void mousePressed(){
 		  ellipse( mouseX, mouseY, 2, 2 );
-		
 		  text( "x: " + mouseX + " y: " + mouseY, mouseX + 2, mouseY );
 		}
 	

@@ -1,13 +1,13 @@
 
 public class RectBoundingBox {
-	public int x1;
-	public int y1;
-	public int x2;
-	public int y2;
-	public int width;
-	public int height;
+	public float x1;
+	public float y1;
+	public float x2;
+	public float y2;
+	public float width;
+	public float height;
 	
-	public RectBoundingBox(int x1, int y1, int x2, int y2) {
+	public RectBoundingBox(float x1, float y1, float x2, float y2) {
 		this.x1 = x1;
 		this.y1 = y1;
 		this.x2 = x2;

@@ -15,6 +15,7 @@ public class GridHelper {
 	
 	private PApplet parent;
 	private RectBoundingBox box;
+	private RectBoundingBox marginBox;
 //	private PVector center;
 	private int topOffset;
 	private int rightOffset;
@@ -39,6 +40,7 @@ public class GridHelper {
 		
 		this.parent = p;
 		this.box = new RectBoundingBox(x1, y1, x2, y2);
+		this.marginBox = new RectBoundingBox(x1, y1, x2, y2);
 //		this.center = new PVector(this.width / 2, this.height / 2);
 		this.topOffset = this.rightOffset = this.bottomOffset = this.leftOffset = 0;
 		this.rowPartition = this.columnPartition = 0;
@@ -48,6 +50,8 @@ public class GridHelper {
 	/**
 	 * Main function that is called whenever the grid is updated.
 	 * Sets both row/column size and row/column intervals to class instance.
+	 * Optimize in the future to only call what is being updated. (i.e. setMarginBoundingBox()
+	 * should only be called if offsets are changed.
 	 */
 	private void init() {
 		if (this.columnPartition == 0) {
@@ -65,6 +69,9 @@ public class GridHelper {
 			this.rowSize = this.setRowSize();
 			this.rowIntervals = this.setRowIntervals();
 		}
+		
+		// Update margin bounding box.
+		this.setMarginBoundingBox();
 	}
 	
 	/**
@@ -134,16 +141,26 @@ public class GridHelper {
 	}
 	
 	/**
+	 * Sets bounding box for margin. Called whenever there are changes made to offsets.
+	 */
+	private void setMarginBoundingBox() {
+		this.marginBox.x1 = this.box.x1 + this.leftOffset;
+		this.marginBox.x2 = this.box.x2 - this.rightOffset;
+		this.marginBox.y1 = this.box.y1 + this.topOffset;
+		this.marginBox.y2 = this.box.y2 - this.bottomOffset;
+	}
+	
+	/**
 	 * Gets all partition points (intersection between a row and column partition) 
 	 * in order from left to right, top to bottom. 
 	 * @return an array of PVector partition points
 	 */
 	public ArrayList<PVector> getPartitionPoints() {
 		ArrayList<PVector> vectors = new ArrayList<PVector>();
-		for (int x = 0; x < this.columnIntervals.length; x++) {
-			if (x != 0 && x != this.columnIntervals.length - 1) {
-				for (int y = 0; y < this.rowIntervals.length; y++) {
-					if (y != 0 && y != this.rowIntervals.length - 1) {
+		for (int y = 0; y < this.rowIntervals.length; y++) {
+			if (y != 0 && y != this.rowIntervals.length - 1) {
+				for (int x = 0; x < this.columnIntervals.length; x++) {
+					if (x != 0 && x != this.columnIntervals.length - 1) {
 						vectors.add(new PVector(this.columnIntervals[x], this.rowIntervals[y]));
 					}
 				}
@@ -154,25 +171,118 @@ public class GridHelper {
 	
 	/**
 	 * Gets all partition points including where a partition intersects with a margin line
-	 * (intersection between a row and column partition and their respective margin offset lines).
+	 * (intersection between a row and column partition and their respective margin offset lines)
+	 * in order from left to right, top to bottom.
 	 * @param includeMargin
 	 * @return 
 	 */
-	public ArrayList<PVector> getPartitionPoints(boolean withMargin) {
-		ArrayList vectors = new ArrayList<PVector>();
-		for (int x = 0; x < this.columnIntervals.length; x++) {
-			if (x != 0 && x != this.columnIntervals.length - 1) {
-				for (int y = 0; y < this.rowIntervals.length; y++) {
-					if (y != 0 && y != this.rowIntervals.length - 1) {
-						parent.println(x);
+	public ArrayList<PVector> getPartitionPointsWithMargin() {
+		ArrayList<PVector> vectors = new ArrayList<PVector>();
+	
+		int colLength = this.columnIntervals.length;
+		int rowLength = this.rowIntervals.length;
+		
+		// Get top intersection points
+		vectors.add(new PVector(marginBox.x1, marginBox.y1));
+		for (int x = 0; x < colLength; x++) {
+			if (x != 0 && x != colLength - 1) {
+				vectors.add(new PVector(this.columnIntervals[x], marginBox.y1));
+			}
+		}
+		vectors.add(new PVector(marginBox.x2, marginBox.y1));
+		
+		// Get middle intersection points
+		for (int y = 0; y < rowLength; y++) {
+			if (y != 0 && y != rowLength - 1) {
+				for (int x = 0; x < colLength; x++) {
+					if (x == 0) {
+						vectors.add(new PVector(marginBox.x1, this.rowIntervals[y]));
+					}
+					else if (x != 0 && x != colLength - 1) {
 						vectors.add(new PVector(this.columnIntervals[x], this.rowIntervals[y]));
+					}
+					else if (x == colLength - 1) {
+						vectors.add(new PVector(marginBox.x2, this.rowIntervals[y]));
 					}
 				}
 			}
 		}
+		
+		// Get bottom intersection points
+		vectors.add(new PVector(marginBox.x1, marginBox.y2));
+		for (int x = 0; x < colLength; x++) {
+			if (x != 0 && x != colLength - 1) {
+				vectors.add(new PVector(this.columnIntervals[x], marginBox.y2));
+			}
+		}
+		vectors.add(new PVector(marginBox.x2, marginBox.y2));
+//		this.parent.println("Vector Array Size: " + vectors.size());
 		return vectors;
 	}
-//	
+
+	/**
+	 * Gets all partition points in the middle (intersection between a row and column partition) 
+	 * in order from left to right.
+	 * @return an array of PVector partition points in the middle
+	 */
+	public ArrayList<PVector> getMiddlePartitionPoints() {
+		ArrayList<PVector> vectors = new ArrayList<PVector>();
+		float middleY = this.getMiddleY();
+				for (int x = 0; x < this.columnIntervals.length; x++) {
+					if (x != 0 && x != this.columnIntervals.length - 1) {
+						vectors.add(new PVector(this.columnIntervals[x], middleY));
+					}
+				}
+		return vectors;
+	}
+	
+	public float getLeftMarginX() {
+		return this.marginBox.x1;
+	}
+	
+	public float getRightMarginX() {
+		return this.marginBox.x2;
+	}
+	
+	public float getTopMarginY() {
+		return this.marginBox.y1;
+	}
+	
+	public float getBottomMarginY() {
+		return this.marginBox.y2;
+	}
+	
+	public PVector getTopLeftMargin() {
+		return new PVector(this.marginBox.x1, this.marginBox.y1);
+	}
+	
+	public PVector getTopRightMargin() {
+		return new PVector(this.marginBox.x2, this.marginBox.y1);
+	}
+	
+	public PVector getBottomLeftMargin() {
+		return new PVector(this.marginBox.x1, this.marginBox.y2);
+	}
+	
+	public PVector getBottomRightMargin() {
+		return new PVector(this.marginBox.x2, this.marginBox.y2);
+	}
+	
+	public float getMiddleY() {
+		return this.box.height / 2;
+	}
+	
+	public float getMiddleX() {
+		return this.box.width / 2;
+	}
+	
+	public PVector getMidpoint() {
+		return new PVector(this.getMiddleX(), this.getMiddleX());
+	}
+	
+	
+	
+////	
 //	/**
 //	 * Gets all interval points (includes outer border)
 //	 * @return 
@@ -181,14 +291,20 @@ public class GridHelper {
 //		
 //	}
 //	
-//	/**
-//	 * Gets four margin offset points (where the margin offset lines intersect).
-//	 * @return 
-//	 */
-//	public PVector[] getMarginPoints() {
-//		
-//	}
-//	
+	
+	/**
+	 * Gets four margin offset points (where the margin offset lines intersect).
+	 * @return 
+	 */
+	public PVector[] getMarginPoints() {
+		PVector[] vectors = new PVector[4];
+		vectors[0] = this.getTopLeftMargin();
+		vectors[1] = this.getTopRightMargin();
+		vectors[2] = this.getBottomLeftMargin();
+		vectors[3] = this.getBottomRightMargin();
+		return vectors;
+	}
+	
 	/**
 	 * Draw the grid.
 	 */
@@ -254,7 +370,7 @@ public class GridHelper {
 	}
 	
 	/**
-	 * Set bounding box.
+	 * Sets a new bounding box.
 	 * @param x1
 	 * @param y1
 	 * @param x2
