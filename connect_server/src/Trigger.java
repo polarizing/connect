@@ -13,12 +13,14 @@ public class Trigger {
 	
 	private PApplet parent;
 	private int id;
-	private  PVector pos;
+	private PVector pos;
+	private int color;
 	
-	public Trigger(PApplet p, int id, PVector pos) {
+	public Trigger(PApplet p, int id, PVector pos, int triggerColor) {
 		this.parent = p;
 		this.id = id;
 		this.pos = pos;
+		this.color = triggerColor;
 //		this.log("Trigger initialized");
 	}
 	
@@ -26,7 +28,14 @@ public class Trigger {
 	 * Draws the trigger on the canvas.
 	 */
 	public void draw () {
-		this.parent.ellipse(this.pos.x, this.pos.y, 15, 15);
+		this.parent.noFill();
+		this.parent.stroke(this.color);
+		this.parent.strokeWeight(new Float(1.5));
+		this.parent.ellipse(this.pos.x, this.pos.y, 8, 8);
+		this.parent.fill(255);
+		this.parent.stroke(1);
+		this.parent.strokeWeight(1);
+
 	}
 	
 	public int getId() {

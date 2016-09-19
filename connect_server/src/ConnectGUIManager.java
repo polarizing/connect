@@ -38,17 +38,15 @@ public class ConnectGUIManager implements ControlListener{
 	     .setWidth(100)
 	     .setRange(1, 12) // values can range from big to small as well
 	     .setValue(4)
-	     .setNumberOfTickMarks(12)
-//	     .setSliderMode(Slider.FLEXIBLE)
+	     .setNumberOfTickMarks(100)
 	     .plugTo(this)
 	     ;
 		
 		s2 = this.cp5.addSlider("numColumns")
 		.setPosition(menuX, 75)
 	     .setWidth(100)
-	     .setRange(1, 15) // values can range from big to small as well
-	     .setNumberOfTickMarks(15)
-//	     .setSliderMode(Slider.FLEXIBLE)
+	     .setRange(1, 12) // values can range from big to small as well
+	     .setNumberOfTickMarks(100)
 	     .plugTo(this)
 	     ;
 		
@@ -58,7 +56,6 @@ public class ConnectGUIManager implements ControlListener{
 	     .setRange(1, 12) // values can range from big to small as well
 	     .setMax(12)
 	     .setNumberOfTickMarks(12)
-//	     .setSliderMode(Slider.FLEXIBLE)
 	     .plugTo(this)
 	     ;
 		
@@ -83,9 +80,29 @@ public class ConnectGUIManager implements ControlListener{
 		// (controlP5 version 0.5.9 or later)
 	}
 	
+//	public void numColumns(int theValue) {
+//		Controller c = cp5.getController("numColumns");
+//		if (theValue < this.server.clients.size()) {
+//			c.setValue(theValue + 1);
+//		}
+//	}
+//	
 	public void numClients(int theValue) {
 		Controller c = cp5.getController("numColumns");
-		
+		int numToAdd = theValue - this.server.clients.size();
+		parent.println (numToAdd);
+		if (numToAdd > 0) {
+			for (int i = 0; i < numToAdd; i++) {
+				c.setValue(theValue);
+				this.server.clients.add(new Client(parent, this.server.clients.size()));
+			}
+		}
+		else {
+			for (int i = 0; i < -numToAdd; i++) {
+				c.setValue(theValue);
+				this.server.clients.remove(this.server.clients.size() - 1);
+			}			
+		}
 	}
 	
 	
@@ -108,6 +125,7 @@ public class ConnectGUIManager implements ControlListener{
 	
 	public void removeClient(int theValue) {
 		Controller c = cp5.getController("numColumns");
+		Controller c2 = cp5.getController("numClients");
 		int toSet = (int) c.getValue() - 1;
 		float min = c.getMin();
 		if (toSet < min) return;
@@ -116,6 +134,7 @@ public class ConnectGUIManager implements ControlListener{
 			this.server.numClients = toSet;
 			this.server.clients.remove(this.server.clients.size() - 1);
 		}
+		c2.setValue(toSet);
 	}
 	
 	public void resize() {
@@ -129,14 +148,6 @@ public class ConnectGUIManager implements ControlListener{
 		cp5.setGraphics(this.parent, 0, 0);
 	}
 	
-	
-//	public void numClients(int theValue) {
-//	  parent.println("a slider event. setting background to "+theValue);
-//	}
-//
-//	public void numRows(int theValue) {
-//		parent.println("wow");
-//	}
 	
 	@Override
 	public void controlEvent(ControlEvent theEvent) {

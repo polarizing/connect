@@ -55,7 +55,9 @@ public class ConnectServer extends PApplet{
 	 */
 	public void settings() {
 		print ("\nSettings called.\n");
-		size(900, 600);
+		size(1980, 1080);
+		// use P2D for OpenGL faster processing (by a lot, especially for lines ...)
+//		smooth(4);
 //	 fullScreen();
 	}
 
@@ -97,15 +99,20 @@ public class ConnectServer extends PApplet{
 //		}
 		
 		print ("Setup called.\n");
-		frameRate(30);
+		frameRate(120);
 	}
 
 	public void draw() {
-		
+
+		// optimize to call this only on resize event
 		gui.resize();
 
 //		// Clear canvas on every frame.
 		background(color(34, 34, 34));
+		
+		// frameRate indicator
+		fill(255);
+		text("FPS: " + frameRate,20,20);
 
 		// Draw initial line in middle of screen.
 		stroke(45, 45, 45);
@@ -113,10 +120,10 @@ public class ConnectServer extends PApplet{
 		line(0, height / 2, width, height / 2);
 		
 		// Update the grid helper. Optimize later.
-			this.grid = new GridHelper(this, 0, 0, width, height);
-			this.grid.setOffsets(new int[]{marginOffset, marginOffset, marginOffset, marginOffset})
-					.setPartitions(new int[]{numRows, numColumns});
-			this.grid.draw();
+		this.grid = new GridHelper(this, 0, 0, width, height);
+		this.grid.setOffsets(new int[]{marginOffset, marginOffset, marginOffset, marginOffset})
+				.setPartitions(new int[]{numRows, numColumns});
+		this.grid.draw();
 		
 		ArrayList<PVector> points = this.grid.getMiddlePartitionPoints();
 		points.add(0, new PVector(this.grid.getLeftMarginX(), this.grid.getMiddleY()));		
@@ -138,7 +145,8 @@ public class ConnectServer extends PApplet{
 
 			for (int j = 1; j <= numTriggers; j++) {
 				PVector pos = new PVector( (xInterval * j) + xPos, yPos);
-				Trigger t = new Trigger(this, triggerId, pos);
+				int triggerColor = color(random(255), random(255), random(255));
+				Trigger t = new Trigger(this, triggerId, pos, triggerColor);
 				t.draw();
 //				this.triggers.add(t);
 //				client.addTrigger(t);
