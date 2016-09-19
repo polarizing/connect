@@ -4,6 +4,7 @@ import processing.core.PVector;
 import java.util.List;
 
 import controlP5.ControlEvent;
+import controlP5.Controller;
 
 import java.util.ArrayList;
 
@@ -17,7 +18,6 @@ import java.awt.event.*;
  *
  */
 
-
 public class ConnectServer extends PApplet{
 	
 	/** ConnectIO Instance Variables **/
@@ -30,11 +30,10 @@ public class ConnectServer extends PApplet{
 	private int numColumns;
 	private int numRows;
 	private int marginOffset;
-	private int rightOffset;
 	
-	private int numClients;
-	private List<Client> clients;
-	private List<Trigger> triggers;
+	public int numClients;
+	public List<Client> clients;
+	public List<Trigger> triggers;
 	
 	/** Constructor to setup the application. */
 	public ConnectServer() {
@@ -43,7 +42,6 @@ public class ConnectServer extends PApplet{
 		this.numColumns = 4;
 		this.numRows = 2;
 		this.marginOffset = 30;
-		this.rightOffset = 30;
 		
 		this.numClients = 4;
 		this.clients = new ArrayList<Client>();
@@ -61,6 +59,9 @@ public class ConnectServer extends PApplet{
 //	 fullScreen();
 	}
 
+	public List<Client> getClients() {
+		return this.clients;
+	}
 	/**
 	 * setup() function is run once, when the program starts. 
 	 * It's used to define initial environment properties such as screen size
@@ -71,13 +72,13 @@ public class ConnectServer extends PApplet{
 		// Sets window to be resizable.
 		this.surface.setResizable(true);
 		
-		// Initialize GUI
-		this.gui = new ConnectGUIManager(this);
-		
 		// Initialize all clients
 		for (int i = 0; i < this.numClients; i++) {
 			this.clients.add(new Client(this, i));
 		}
+		
+		// Initialize GUI
+		this.gui = new ConnectGUIManager(this);
 		
 		// Initialize all triggers
 //		for (int clientId = 0, triggerId = 0; clientId < this.numClients; clientId++) {
@@ -94,12 +95,14 @@ public class ConnectServer extends PApplet{
 //				triggerId++;
 //			}
 //		}
+		
 		print ("Setup called.\n");
 		frameRate(30);
 	}
 
 	public void draw() {
-		println(numColumns);
+		
+		gui.resize();
 
 //		// Clear canvas on every frame.
 		background(color(34, 34, 34));
@@ -115,33 +118,33 @@ public class ConnectServer extends PApplet{
 					.setPartitions(new int[]{numRows, numColumns});
 			this.grid.draw();
 		
-//		ArrayList<PVector> points = this.grid.getMiddlePartitionPoints();
-//		points.add(0, new PVector(this.grid.getLeftMarginX(), this.grid.getMiddleY()));		
-//		points.add(points.size(), new PVector(this.grid.getRightMarginX(), this.grid.getMiddleY()));
-//		
+		ArrayList<PVector> points = this.grid.getMiddlePartitionPoints();
+		points.add(0, new PVector(this.grid.getLeftMarginX(), this.grid.getMiddleY()));		
+		points.add(points.size(), new PVector(this.grid.getRightMarginX(), this.grid.getMiddleY()));
+		
 //		for (PVector point :  points) {
 //			ellipse(point.x, point.y, 15, 15);
 //		}
 //		
-//		for (int i = 0, triggerId = 0; i < this.numClients; i++) {
-//			Client client = this.clients.get(i);
-//			int numTriggers = client.getNumTriggers();
-//			PVector leftPoint = points.get(i);
-//			PVector rightPoint = points.get(i+1);
-//			float yPos = leftPoint.y;
-//			float xPos = leftPoint.x;
-//			float xDist = rightPoint.x - leftPoint.x;
-//			float xInterval = xDist / (numTriggers + 1);
-//
-//			for (int j = 1; j <= numTriggers; j++) {
-//				PVector pos = new PVector( (xInterval * j) + xPos, yPos);
-//				Trigger t = new Trigger(this, triggerId, pos);
-//				t.draw();
-////				this.triggers.add(t);
-////				client.addTrigger(t);
-////				triggerId++;
-//			}
-//		}
+		for (int i = 0, triggerId = 0; i < this.numClients; i++) {
+			Client client = this.clients.get(i);
+			int numTriggers = client.getNumTriggers();
+			PVector leftPoint = points.get(i);
+			PVector rightPoint = points.get(i+1);
+			float yPos = leftPoint.y;
+			float xPos = leftPoint.x;
+			float xDist = rightPoint.x - leftPoint.x;
+			float xInterval = xDist / (numTriggers + 1);
+
+			for (int j = 1; j <= numTriggers; j++) {
+				PVector pos = new PVector( (xInterval * j) + xPos, yPos);
+				Trigger t = new Trigger(this, triggerId, pos);
+				t.draw();
+//				this.triggers.add(t);
+//				client.addTrigger(t);
+				triggerId++;
+			}
+		}
 
 //		
 //		for (Trigger t : this.triggers) {
@@ -150,11 +153,16 @@ public class ConnectServer extends PApplet{
 		
 //		 Slower logging (1 sec)
 		if (frameCount % 30 == 0) {
-			println("Clients = "+this.numClients);
 			println("Rows = "+this.numRows);
 			println("Columns = "+this.numColumns);
 //			println(this.grid.getPartitionPoints());
 			println(this.grid.getPartitionPointsWithMargin()); // with margin
+			
+			for (Client client : this.clients) {
+				println("Client: " + client.getClientId());
+			}
+			println("Clients = "+this.numClients);
+
 		}
 	}
 	

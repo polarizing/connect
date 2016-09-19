@@ -6,17 +6,27 @@ public class ConnectGUIManager implements ControlListener{
 	private PApplet parent;
 	private ControlP5 cp5;
 	private ControlWindow window;
-	private Slider s1;
+	private Slider s1, s2, s3, s4;
+	private Button b1, b2;
+	private int menuX;
 	CallbackListener cb;
+	// Really confusing as to why:
+	// https://forum.processing.org/one/topic/a-basic-question-on-accessing-one-variable-from-different-classes-in-eclipse-java.html
+	ConnectServer server;
 	
 	public ConnectGUIManager(PApplet p) {
 		this.parent = p;
+		// read up!!
+		// https://forum.processing.org/one/topic/a-basic-question-on-accessing-one-variable-from-different-classes-in-eclipse-java.html
+		this.server = (ConnectServer) p;
 		this.cp5 = new ControlP5(p);
 		this.cp5.addListener(this);
 		
-		  cp5.setColorForeground(0xffaa0000);
-		  cp5.setColorBackground(0xff660000);
-		  cp5.setColorActive(0xffff0000);
+		  this.cp5.setColorForeground(0xffaa0000);
+		  this.cp5.setColorBackground(0xff660000);
+		  this.cp5.setColorActive(0xffff0000);
+		  
+		  this.menuX = parent.width - 200;
 		
 		// External Control Window Disabled in ControlP5 v2.0 ...
 		// Look into using Java AWT Frame
@@ -24,35 +34,26 @@ public class ConnectGUIManager implements ControlListener{
 		
 		// Number of Clients Slider
 		s1 = this.cp5.addSlider("numClients")
-	     .setPosition(parent.width - 200, 50)
-	     .setWidth(100)
-	     .setRange(1, 24) // values can range from big to small as well
-	     .setValue(4)
-	     .setNumberOfTickMarks(24)
-//	     .setSliderMode(Slider.FLEXIBLE)
-	     .plugTo(this)
-	     ;
-
-//		s1.addCallback(new CallbackListener() {
-//		    public void controlEvent(CallbackEvent theEvent) {
-//		      switch(theEvent.getAction()) {
-//		      case(ControlP5.ACTION_LEAVE):
-//
-//		      }
-//		    }
-//		  });
-		
-		this.cp5.addSlider("numColumns")
-		.setPosition(parent.width - 200, 75)
+	     .setPosition(menuX, 50)
 	     .setWidth(100)
 	     .setRange(1, 12) // values can range from big to small as well
+	     .setValue(4)
 	     .setNumberOfTickMarks(12)
 //	     .setSliderMode(Slider.FLEXIBLE)
 	     .plugTo(this)
 	     ;
 		
-		this.cp5.addSlider("numRows")
-		.setPosition(parent.width - 200, 100)
+		s2 = this.cp5.addSlider("numColumns")
+		.setPosition(menuX, 75)
+	     .setWidth(100)
+	     .setRange(1, 15) // values can range from big to small as well
+	     .setNumberOfTickMarks(15)
+//	     .setSliderMode(Slider.FLEXIBLE)
+	     .plugTo(this)
+	     ;
+		
+		s3 = this.cp5.addSlider("numRows")
+		.setPosition(menuX, 100)
 	     .setWidth(100)
 	     .setRange(1, 12) // values can range from big to small as well
 	     .setMax(12)
@@ -61,21 +62,20 @@ public class ConnectGUIManager implements ControlListener{
 	     .plugTo(this)
 	     ;
 		
-		this.cp5.addSlider("marginOffset")
-		.setPosition(parent.width - 200, 125)
+		s4 = this.cp5.addSlider("marginOffset")
+		.setPosition(menuX, 125)
 		.setWidth(100)
 	     .setRange(0, 150)
 		.plugTo(this);
 		
-		this.cp5.addSlider("rightOffset")
-		.setPosition(parent.width - 200, 150)
-		.setWidth(100)
-	     .setRange(0, 400)
-		.plugTo(this);
+		b1 = this.cp5.addButton("addClient")
+		.setPosition(menuX, 175)
+		.setSize(100, 19)
+		.plugTo(this)
+		;
 		
-		this.cp5.addButton("addClient")
-//		.setValue(5)
-		.setPosition(parent.width - 200, 175)
+		b2 = this.cp5.addButton("removeClient")
+		.setPosition(menuX, 200)
 		.setSize(100, 19)
 		.plugTo(this)
 		;
@@ -83,15 +83,52 @@ public class ConnectGUIManager implements ControlListener{
 		// (controlP5 version 0.5.9 or later)
 	}
 	
+	public void numClients(int theValue) {
+		Controller c = cp5.getController("numColumns");
+		
+	}
+	
+	
 	public void addClient(int theValue) {
 		parent.println("a button event from addClient: " + theValue);
 		Controller c = cp5.getController("numColumns");
-		float toSet = c.getValue() + 1;
+		Controller c2 = cp5.getController("numClients");
+		int toSet = (int) c.getValue() + 1;
+		float max = c.getMax();
+		if (toSet > max) return;
+		else {
+			c.setValue(toSet);
+			this.server.numClients = toSet;
+			this.server.clients.add(new Client(parent, this.server.clients.size()));
+		}
+		c2.setValue(toSet);
 		parent.println(toSet);
-		c.setValue(toSet);
-		c.setValue(toSet);
 		parent.println("Set");
 	}
+	
+	public void removeClient(int theValue) {
+		Controller c = cp5.getController("numColumns");
+		int toSet = (int) c.getValue() - 1;
+		float min = c.getMin();
+		if (toSet < min) return;
+		else {
+			c.setValue(toSet);
+			this.server.numClients = toSet;
+			this.server.clients.remove(this.server.clients.size() - 1);
+		}
+	}
+	
+	public void resize() {
+		menuX = this.parent.width - 200;
+		s1.setPosition(menuX, 50);
+		s2.setPosition(menuX, 75);
+		s3.setPosition(menuX, 100);
+		s4.setPosition(menuX, 125);
+		b1.setPosition(menuX, 150);
+		b2.setPosition(menuX, 175);
+		cp5.setGraphics(this.parent, 0, 0);
+	}
+	
 	
 //	public void numClients(int theValue) {
 //	  parent.println("a slider event. setting background to "+theValue);

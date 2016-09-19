@@ -27,6 +27,10 @@ public class Client {
 //		this.log("Client initialized.");
 	}
 	
+	public int getClientId() {
+		return this.clientId;
+	}
+	
 	public void addTrigger (Trigger trigger) {
 		this.triggers.add(trigger);
 	}
