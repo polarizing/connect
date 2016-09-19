@@ -24,12 +24,15 @@ public class ConnectServer extends PApplet{
 	
 	/** Helper Classes **/
 	private ConnectGUIManager gui;
-	private GridHelper grid;
+	public GridHelper grid;
+	public GridAnimator gridAnimator;
 	
 	/** Grid Variables **/
-	private int numColumns;
-	private int numRows;
-	private int marginOffset;
+	public int numColumns;
+	public int numRows;
+	public int marginOffset;
+	public int rightOffset;
+	public boolean isAnimating = true;
 	
 	public int numClients;
 	public List<Client> clients;
@@ -42,6 +45,7 @@ public class ConnectServer extends PApplet{
 		this.numColumns = 4;
 		this.numRows = 2;
 		this.marginOffset = 30;
+		this.rightOffset = 30;
 		
 		this.numClients = 4;
 		this.clients = new ArrayList<Client>();
@@ -55,7 +59,7 @@ public class ConnectServer extends PApplet{
 	 */
 	public void settings() {
 		print ("\nSettings called.\n");
-		size(1980, 1080);
+		size(900, 600);
 		// use P2D for OpenGL faster processing (by a lot, especially for lines ...)
 //		smooth(4);
 //	 fullScreen();
@@ -81,6 +85,15 @@ public class ConnectServer extends PApplet{
 		
 		// Initialize GUI
 		this.gui = new ConnectGUIManager(this);
+	
+		// Initialize Grid
+		this.grid = new GridHelper(this, 0, 0, width, height);
+		this.grid.setOffsets(new int[]{marginOffset, rightOffset, marginOffset, marginOffset})
+				 .setPartitions(new int[]{numRows, numColumns});
+		
+		// Initialize Grid Animator
+		this.gridAnimator = new GridAnimator(this);
+
 		
 		// Initialize all triggers
 //		for (int clientId = 0, triggerId = 0; clientId < this.numClients; clientId++) {
@@ -99,11 +112,11 @@ public class ConnectServer extends PApplet{
 //		}
 		
 		print ("Setup called.\n");
-		frameRate(120);
+		frameRate(30);
 	}
 
 	public void draw() {
-
+		
 		// optimize to call this only on resize event
 		gui.resize();
 
@@ -120,10 +133,14 @@ public class ConnectServer extends PApplet{
 		line(0, height / 2, width, height / 2);
 		
 		// Update the grid helper. Optimize later.
-		this.grid = new GridHelper(this, 0, 0, width, height);
-		this.grid.setOffsets(new int[]{marginOffset, marginOffset, marginOffset, marginOffset})
-				.setPartitions(new int[]{numRows, numColumns});
+//		this.grid.setOffsets(new int[]{marginOffset, marginOffset, marginOffset, marginOffset})
+//		.setPartitions(new int[]{numRows, numColumns})
+		this.grid.setRectBoundingBox(0, 0, width, height);
+
 		this.grid.draw();
+		
+		// Pass grid helper to animator.		
+		this.gridAnimator.runAnimations();
 		
 		ArrayList<PVector> points = this.grid.getMiddlePartitionPoints();
 		points.add(0, new PVector(this.grid.getLeftMarginX(), this.grid.getMiddleY()));		

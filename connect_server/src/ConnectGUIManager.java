@@ -7,7 +7,7 @@ public class ConnectGUIManager implements ControlListener{
 	private ControlP5 cp5;
 	private ControlWindow window;
 	private Slider s1, s2, s3, s4;
-	private Button b1, b2;
+	private Button b1, b2, b3;
 	private int menuX;
 	CallbackListener cb;
 	// Really confusing as to why:
@@ -38,7 +38,7 @@ public class ConnectGUIManager implements ControlListener{
 	     .setWidth(100)
 	     .setRange(1, 12) // values can range from big to small as well
 	     .setValue(4)
-	     .setNumberOfTickMarks(100)
+	     .setNumberOfTickMarks(12)
 	     .plugTo(this)
 	     ;
 		
@@ -46,7 +46,7 @@ public class ConnectGUIManager implements ControlListener{
 		.setPosition(menuX, 75)
 	     .setWidth(100)
 	     .setRange(1, 12) // values can range from big to small as well
-	     .setNumberOfTickMarks(100)
+	     .setNumberOfTickMarks(12)
 	     .plugTo(this)
 	     ;
 		
@@ -76,6 +76,11 @@ public class ConnectGUIManager implements ControlListener{
 		.setSize(100, 19)
 		.plugTo(this)
 		;
+		
+		b3 = this.cp5.addButton("slideInRight")
+				.setPosition(menuX, 225)
+				.setSize(100, 19)
+				.plugTo(this);
 		// connects controller to the controller method below.
 		// (controlP5 version 0.5.9 or later)
 	}
@@ -105,8 +110,20 @@ public class ConnectGUIManager implements ControlListener{
 		}
 	}
 	
+	public void numColumns (int theValue) {
+		this.server.grid.setColumnPartitions(theValue);
+	}
+	
+	public void numRows (int theValue) {
+		this.server.grid.setRowPartitions(theValue);
+	}
+	
+	public void marginOffset (int theValue) {
+		this.server.grid.setOffsets(new int[]{theValue, theValue, theValue, theValue});
+	}
 	
 	public void addClient(int theValue) {
+		this.server.gridAnimator.slideIn("right", 100, 2);
 		parent.println("a button event from addClient: " + theValue);
 		Controller c = cp5.getController("numColumns");
 		Controller c2 = cp5.getController("numClients");
@@ -122,7 +139,7 @@ public class ConnectGUIManager implements ControlListener{
 		parent.println(toSet);
 		parent.println("Set");
 	}
-	
+
 	public void removeClient(int theValue) {
 		Controller c = cp5.getController("numColumns");
 		Controller c2 = cp5.getController("numClients");
@@ -135,6 +152,11 @@ public class ConnectGUIManager implements ControlListener{
 			this.server.clients.remove(this.server.clients.size() - 1);
 		}
 		c2.setValue(toSet);
+	}
+	
+	public void slideInRight(int theValue) {
+		parent.println("pressed");
+		this.server.gridAnimator.slideIn("right", 30, 2);
 	}
 	
 	public void resize() {

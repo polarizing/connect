@@ -28,6 +28,7 @@ public class GridHelper {
 	private float[] columnIntervals;
 	private float[] rowIntervals;
 
+	ConnectServer server;
 	/**
 	 * 
 	 * @param p
@@ -39,6 +40,7 @@ public class GridHelper {
 	public GridHelper (PApplet p, int x1, int y1, int x2, int y2) {
 		
 		this.parent = p;
+		this.server = (ConnectServer) p;
 		this.box = new RectBoundingBox(x1, y1, x2, y2);
 		this.marginBox = new RectBoundingBox(x1, y1, x2, y2);
 //		this.center = new PVector(this.width / 2, this.height / 2);
@@ -82,6 +84,8 @@ public class GridHelper {
 	 */
 	private float setColumnSize () {
 		int leftRightOffset = this.leftOffset + this.rightOffset;
+//		parent.println("called set col");
+//		parent.println((float)(this.box.width - leftRightOffset) / this.columnPartition);
 		return (float)(this.box.width - leftRightOffset) / this.columnPartition;
 	}
 	
@@ -148,6 +152,18 @@ public class GridHelper {
 		this.marginBox.x2 = this.box.x2 - this.rightOffset;
 		this.marginBox.y1 = this.box.y1 + this.topOffset;
 		this.marginBox.y2 = this.box.y2 - this.bottomOffset;
+	}
+	
+	public void addColumn() {
+//		parent.println("called");
+//		parent.println(this.rightOffset);
+//		for (int i = 0; i < 100; i++) {
+//			this.server.rightOffset += 1;
+//			this.server.draw();
+////			this.setOffsets(new int[]{this.topOffset, this.rightOffset + 100, this.bottomOffset, this.leftOffset});
+//		}
+//		parent.println(this.rightOffset);
+//		parent.println("done");
 	}
 	
 	/**
@@ -351,6 +367,17 @@ public class GridHelper {
 		return new int[]{this.topOffset, this.rightOffset, this.bottomOffset, this.leftOffset};
 	}
 	
+	public GridHelper setRightOffset(int offset) {
+		this.rightOffset = offset;
+		parent.println(this.rightOffset);
+		this.init();
+		return this;
+	}
+	
+	public int getRightOffset() {
+		return this.rightOffset;
+	}
+	
 	/**
 	 * Partition or segment the grid into a number of rows and columns. The array must be
 	 * in the order specified (see @param). If a position should not have a partition,
@@ -367,6 +394,18 @@ public class GridHelper {
 
 	public int[] getPartitions() {
 		return new int[]{this.rowPartition, this.columnPartition};
+	}
+	
+	public GridHelper setRowPartitions(int partitions) {
+		this.rowPartition = partitions;
+		this.init();
+		return this;
+	}
+	
+	public GridHelper setColumnPartitions(int partitions) {
+		this.columnPartition = partitions;
+		this.init();
+		return this;
 	}
 	
 	/**
