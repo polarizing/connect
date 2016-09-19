@@ -86,7 +86,7 @@ public class ConnectServer extends PApplet{
 		// Initialize GUI
 		this.gui = new ConnectGUIManager(this);
 	
-		// Initialize Grid
+		// Initialize and Setup Grid
 		this.grid = new GridHelper(this, 0, 0, width, height);
 		this.grid.setOffsets(new int[]{marginOffset, rightOffset, marginOffset, marginOffset})
 				 .setPartitions(new int[]{numRows, numColumns});

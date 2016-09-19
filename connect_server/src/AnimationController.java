@@ -11,7 +11,7 @@ public class AnimationController {
 	int endingFrame;
 	
 	public AnimationController (String animation, int frameCount, String direction, float delta, float time){
-		this.animation = animation;
+		this.animation = animation; 
 		this.direction = direction;
 		this.delta = delta;
 		this.time = time;
@@ -25,10 +25,18 @@ public class AnimationController {
 		return this.currentFrame < this.endingFrame;
 	}
 	
+	public boolean isDone () {
+		return this.currentFrame == this.endingFrame;
+	}
+	
 	public String getAnimation() {
 		return this.animation;
 	}
 	
+//	public void onAnimationEnd(ConnectServer server) {
+//		server.clients.add(new Client(parent, this.server.clients.size()));
+//	}
+//	
 	public void incrementFrameCount () {
 		this.currentFrame += 1;
 	}

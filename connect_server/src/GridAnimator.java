@@ -8,7 +8,6 @@ public class GridAnimator {
 	ConnectServer server;
 	ArrayList<AnimationController> controllers = new ArrayList<AnimationController>();
 	
-	
 	public GridAnimator (PApplet p) {
 		this.parent = p;
 		this.server = (ConnectServer) p;
@@ -22,20 +21,30 @@ public class GridAnimator {
 	}
 	
 	public void runAnimations () {
-		parent.println(this.controllers);
+//		parent.println(this.controllers);
 		
 		for (int ctrlIdx = 0; ctrlIdx < this.controllers.size(); ctrlIdx++ ) {
 			AnimationController controller = this.controllers.get(ctrlIdx);
+			// Animating
 			if (controller.isReady()) {
 				if (controller.getAnimation() == "slideIn") {
 					int currRightOffset = this.grid.getRightOffset();
-					this.grid.setRightOffset(currRightOffset + 1);
+					this.grid.setRightOffset(currRightOffset + 2);
 					controller.incrementFrameCount();
 				}
 			}
-			else {
+			// Done With Animation
+			else if (controller.isDone()){
+				this.server.grid.setOffsets(new int[]{30, 30, 30, 30});
+
+				// Change into callback??
+//				controller.onAnimationEnd(this.server);
+				
+				this.server.clients.add(new Client(parent, this.server.clients.size()));
+				this.server.grid.setColumnPartitions(++this.server.numColumns);
+				server.numClients++;
 				parent.println("getting in here");
-				controllers.remove(ctrlIdx);
+				this.controllers.remove(ctrlIdx);
 			}
 		}
 	}
