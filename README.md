@@ -53,7 +53,7 @@ Great! The main method does the following. It starts a PApplet application, and 
 - This is done by calling PApplet's main method and giving it the name of this class as a parameter.
 - The class constructor is called first, then settings(), setup(), and the draw() function are called in that respective order.
 
-I went ahead and set the size of the canvas as well as making it resizable and a commented-out "fullScreen()" in case I needed to test my application in full-screen.
+I went ahead and set the size of the canvas as well as making it resizable and a commented-out "fullScreen()" in case I needed to test my application in full-screen. I wanted to make sure the application was fully-responsive and planned to test out resizing it and making it fullScreen as I went on developing the application. 
 
 ```java
   // in settings()
@@ -66,9 +66,107 @@ I went ahead and set the size of the canvas as well as making it resizable and a
 
 I'm also going to go ahead and attach the ControlP5 GUI to my application. I decided to test this out early on because I feel it is an useful tool (not only as an end-product) but also for debugging purposes.
 
-I downloaded controlP5.jar and included it as a library to my project build path. 
+I downloaded controlP5.jar and included it as a library to my project build path. I took a look at some example code and it seemed relatively intuitive, almost magical. A simple example -
 
+```java
+import controlP5.*;
 
+ControlP5 cp5;
+
+int sliderValue = 100;
+void setup() {
+  size(700,400);
+  noStroke();
+  cp5 = new ControlP5(this);
+  
+  // add a horizontal sliders, the value of this slider will be linked
+  // to variable 'sliderValue' 
+  cp5.addSlider("sliderValue")
+     .setPosition(100,50)
+     .setRange(0,255)
+     ;
+}
+void draw() {
+    background(sliderTicks1);
+}
+void slider(float theColor) {
+  println("a slider event. setting background to "+theColor);
+}
+
+```
+
+We can declare controllers with a name that is the same as the variable name of which value we want to change. ControlP5 (using the Java Reflection API -- which is an interesting [read](https://docs.oracle.com/javase/tutorial/reflect/)) will be able to access that code. ControlP5 will allow you to create a method with that variable/controller name which is called each time the controller generates an event detected by the library. These controllers can range from sliders to dropdowns, to text fields, etc. We can also access information associated with every event in the controlEvent method.
+
+This is all good except for the part where the code and options for each controller, its listener methods, and other variables get quite long. We want a way to separate out the GUI logic from the main class. Unfortunately, ControlP5 makes this somewhat difficult to do as it relies heavily on the "reflection technique". Often times, making things seem "magical" and intuitive has its drawbacks. I had to do some research and thanks to some guys at Processing Forum, there is a solution!
+
+These are some of the links that helped me [here](https://forum.processing.org/one/topic/having-a-controlp5-controller-inside-a-class.html), [here](https://forum.processing.org/two/discussion/17400/using-controlp5-in-externel-class), and [here](https://forum.processing.org/two/discussion/13625/how-to-use-controlp5-inside-classes). 
+
+The simple answer is that we need a ControlP5 attribute inside the class and we need to create it in the constructor. To do that we need to pass a PApplet instance in to the parameters of the class. 
+
+This gets us halfway there. We also (this took a few hours of Googling) need to reroute those functions (usually) found by reflection in the main PApplet class. We can use the ControlListener interface with our own class as an event listener to one or more controllers. See [this example](http://www.sojamo.com/libraries/controlP5/reference/controlP5/ControlListener.html). We can *implement* ControlListener! So now we can write our GUIManager!
+
+```java
+import processing.core.PApplet;
+import controlP5.*;
+
+public class ConnectGUIManager implements ControlListener{
+	private PApplet parent;
+	private ControlP5 cp5;
+
+	public ConnectGUIManager(PApplet p) {
+		this.parent = p;
+		this.cp5 = new ControlP5(p);
+		
+	public void controlEvent(ControlEvent theEvent) {
+//		parent.println("got something");
+//		parent.println(theEvent);
+	}
+}
+```
+
+Not too bad! We can now add an instance of this class to our main class ConnectServer.
+
+```java
+  /** Instance Variables **/
+  private ConnectGUIManager gui;
+	
+	...
+  
+  public void setup() {
+	  ...
+	  this.gui = new ConnectGUIManager(this);
+	  ...
+	}
+```
+
+I went ahead and customized the GUI a slight bit and added a slider controller attached to a variable, numClients, in the main class
+
+```java
+  // in ConnectServer class
+  private int numClients;
+  
+  ...
+  
+  public ConnectServer() {
+    this.numClients = 4;
+  }
+
+  // in ConnectGUIManager class
+  this.cp5.setColorForeground(0xffaa0000);
+  this.cp5.setColorBackground(0xff660000);
+  this.cp5.setColorActive(0xffff0000);
+	
+	s1 = this.cp5.addSlider("numClients")
+   .setPosition(parent.width - 200, 50)
+   .setWidth(100)
+   .setRange(1, 24) // values can range from big to small as well
+   .setValue(4)
+   .setNumberOfTickMarks(24)
+   .plugTo(this)
+   ;
+```
+
+It works! 
 
 
 
