@@ -4,42 +4,47 @@ public class AnimationController {
 	String animation;
 	String direction;
 	float delta;
-	float time;
-	int frameCount;
-	int startingFrame;
-	int currentFrame;
-	int endingFrame;
+	boolean isAnimating;
 	
-	public AnimationController (String animation, int frameCount, String direction, float delta, float time){
+	public AnimationController (String animation, String direction, float delta){
 		this.animation = animation; 
 		this.direction = direction;
 		this.delta = delta;
-		this.time = time;
-		this.frameCount = frameCount;
-		this.startingFrame = frameCount;
-		this.currentFrame = frameCount;
-		this.endingFrame = (int) (frameCount + (this.time * 30));
+		this.isAnimating = true;
 	}
 	
-	public boolean isReady () {
-		return this.currentFrame < this.endingFrame;
-	}
-	
+//	
 	public boolean isDone () {
-		return this.currentFrame == this.endingFrame;
+		return !this.isAnimating;
+	}
+	
+	public void endAnimation() {
+		this.isAnimating = false;
 	}
 	
 	public String getAnimation() {
 		return this.animation;
 	}
 	
+	public String getDirection() {
+		return this.direction;
+	}
+	
+	public float getDelta() {
+		return this.delta;
+	}
+	
+//	public float getTotalFrameCount() {
+//		return this.totalFrameCount;
+//	}
+	
 //	public void onAnimationEnd(ConnectServer server) {
 //		server.clients.add(new Client(parent, this.server.clients.size()));
 //	}
 //	
-	public void incrementFrameCount () {
-		this.currentFrame += 1;
-	}
+//	public void incrementFrameCount () {
+//		this.currentFrame += 1;
+//	}
 	
 	
 	

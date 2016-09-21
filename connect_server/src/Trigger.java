@@ -24,6 +24,19 @@ public class Trigger {
 //		this.log("Trigger initialized");
 	}
 	
+	
+	public void setPosition (PVector pos) {
+		this.pos = pos;
+	}
+	
+	public float getX () {
+		return this.pos.x;
+	}
+	
+	public float getY () {
+		return this.pos.y;
+	}
+	
 	/**
 	 * Draws the trigger on the canvas.
 	 */

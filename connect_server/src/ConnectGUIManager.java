@@ -27,29 +27,34 @@ public class ConnectGUIManager implements ControlListener{
 		  this.cp5.setColorActive(0xffff0000);
 		  
 		  this.menuX = parent.width - 200;
+		  
+		 
 		
 		// External Control Window Disabled in ControlP5 v2.0 ...
 		// Look into using Java AWT Frame
 //		window = cp5.addControlWindow("Control", 100, 100, 200, 200);
 		
 		// Number of Clients Slider
+		  this.parent.println("here:" + this.server.numClients);
+
 		s1 = this.cp5.addSlider("numClients")
 	     .setPosition(menuX, 50)
-	     .setWidth(100)
-	     .setRange(1, 12) // values can range from big to small as well
-	     .setValue(4)
-	     .setNumberOfTickMarks(12)
+//	     .setWidth(100)
+	     .setRange(1, 500) // values can range from big to small as well
+//	     .setNumberOfTickMarks(201)
 	     .plugTo(this)
 	     ;
-		
+		  this.parent.println("here:" + this.server.numClients);
+
 		s2 = this.cp5.addSlider("numColumns")
 		.setPosition(menuX, 75)
-	     .setWidth(100)
-	     .setRange(1, 12) // values can range from big to small as well
-	     .setNumberOfTickMarks(12)
+//	     .setWidth(100)
+	     .setRange(1, 500) // values can range from big to small as well
+//	     .setNumberOfTickMarks(201)
 	     .plugTo(this)
 	     ;
-		
+		  this.parent.println("here:" + this.server.numColumns);
+
 		s3 = this.cp5.addSlider("numRows")
 		.setPosition(menuX, 100)
 	     .setWidth(100)
@@ -57,7 +62,7 @@ public class ConnectGUIManager implements ControlListener{
 	     .setNumberOfTickMarks(12)
 	     .plugTo(this)
 	     ;
-		
+
 		s4 = this.cp5.addSlider("marginOffset")
 		.setPosition(menuX, 125)
 		.setWidth(100)
@@ -75,11 +80,12 @@ public class ConnectGUIManager implements ControlListener{
 		.setSize(100, 19)
 		.plugTo(this)
 		;
-		
-		b3 = this.cp5.addButton("slideInRight")
+
+		b3 = this.cp5.addButton("setClientsActive")
 				.setPosition(menuX, 225)
 				.setSize(100, 19)
 				.plugTo(this);
+		
 		// connects controller to the controller method below.
 		// (controlP5 version 0.5.9 or later)
 	}
@@ -92,21 +98,20 @@ public class ConnectGUIManager implements ControlListener{
 //	}
 //	
 	public void numClients(int theValue) {
-		Controller c = cp5.getController("numColumns");
-		int numToAdd = theValue - this.server.clients.size();
-		parent.println (numToAdd);
-		if (numToAdd > 0) {
-			for (int i = 0; i < numToAdd; i++) {
-				c.setValue(theValue);
-				this.server.clients.add(new Client(parent, this.server.clients.size()));
-			}
-		}
-		else {
-			for (int i = 0; i < -numToAdd; i++) {
-				c.setValue(theValue);
-				this.server.clients.remove(this.server.clients.size() - 1);
-			}			
-		}
+//		Controller c = cp5.getController("numColumns");
+//		int numToAdd = theValue - this.server.clients.size();
+//		if (numToAdd > 0) {
+//			for (int i = 0; i < numToAdd; i++) {
+//				c.setValue(theValue);
+//				this.server.clients.add(new Client(parent, this.server.clients.size()));
+//			}
+//		}
+//		else {
+//			for (int i = 0; i < -numToAdd; i++) {
+//				c.setValue(theValue);
+//				this.server.clients.remove(this.server.clients.size() - 1);
+//			}			
+//		}
 	}
 	
 	public void numColumns (int theValue) {
@@ -122,8 +127,12 @@ public class ConnectGUIManager implements ControlListener{
 	}
 	
 	public void addClient(int theValue) {
-		this.server.gridAnimator.slideIn("right", 100, 2);
+		float delta = this.server.grid.getColumnSize(this.server.grid.getColumnPartitions() + 1);
+		this.server.gridAnimator.slideIn("right", delta);
+		delta = 50;
+		this.server.gridAnimator.slideIn("top", delta);
 //		parent.println("a button event from addClient: " + theValue);
+		
 //		Controller c = cp5.getController("numColumns");
 //		Controller c2 = cp5.getController("numClients");
 //		int toSet = (int) c.getValue() + 1;
@@ -153,9 +162,12 @@ public class ConnectGUIManager implements ControlListener{
 		c2.setValue(toSet);
 	}
 	
-	public void slideInRight(int theValue) {
+	public void setClientsActive(int theValue) {
 		parent.println("pressed");
-		this.server.gridAnimator.slideIn("right", 30, 2);
+		for (Client c : this.server.clients) {
+			c.setConnected();
+		}
+//		this.server.gridAnimator.slideIn("right", 30, 2);
 	}
 	
 	public void resize() {
@@ -166,6 +178,7 @@ public class ConnectGUIManager implements ControlListener{
 		s4.setPosition(menuX, 125);
 		b1.setPosition(menuX, 150);
 		b2.setPosition(menuX, 175);
+		b3.setPosition(menuX, 200);
 		cp5.setGraphics(this.parent, 0, 0);
 	}
 	

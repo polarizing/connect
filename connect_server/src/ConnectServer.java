@@ -3,7 +3,7 @@ import processing.core.PVector;
 
 import java.util.List;
 
-import controlP5.ControlEvent;
+//import controlP5.ControlEvent;
 import controlP5.Controller;
 
 import java.util.ArrayList;
@@ -24,7 +24,7 @@ public class ConnectServer extends PApplet{
 	
 	/** Helper Classes **/
 	private ConnectGUIManager gui;
-	public GridHelper grid;
+	public Grid grid;
 	public GridAnimator gridAnimator;
 	
 	/** Grid Variables **/
@@ -42,12 +42,11 @@ public class ConnectServer extends PApplet{
 	public ConnectServer() {
 		
 		/** Initialize Grid Variables **/
-		this.numColumns = 4;
+		this.numColumns = 1;
 		this.numRows = 2;
-		this.marginOffset = 30;
-		this.rightOffset = 30;
+		this.marginOffset = 0;
 		
-		this.numClients = 4;
+		this.numClients = 1;
 		this.clients = new ArrayList<Client>();
 		this.triggers = new ArrayList<Trigger>();
 		print ("Starting ConnectIO application ...");
@@ -61,8 +60,8 @@ public class ConnectServer extends PApplet{
 		print ("\nSettings called.\n");
 		size(900, 600);
 		// use P2D for OpenGL faster processing (by a lot, especially for lines ...)
-//		smooth(4);
-//	 fullScreen();
+		smooth(4);
+//		fullScreen();
 	}
 
 	public List<Client> getClients() {
@@ -77,44 +76,46 @@ public class ConnectServer extends PApplet{
 
 		// Sets window to be resizable.
 		this.surface.setResizable(true);
-		
-		// Initialize all clients
-		for (int i = 0; i < this.numClients; i++) {
-			this.clients.add(new Client(this, i));
-		}
-		
+
 		// Initialize GUI
 		this.gui = new ConnectGUIManager(this);
-	
+
 		// Initialize and Setup Grid
-		this.grid = new GridHelper(this, 0, 0, width, height);
-		this.grid.setOffsets(new int[]{marginOffset, rightOffset, marginOffset, marginOffset})
+		this.grid = new Grid(this, 0, 0, width, height);
+		this.grid.setOffsets(new int[]{marginOffset, marginOffset, marginOffset, marginOffset})
 				 .setPartitions(new int[]{numRows, numColumns});
 		
 		// Initialize Grid Animator
 		this.gridAnimator = new GridAnimator(this);
+		
+		// Create a list of GridContainers for each column
+		ArrayList<GridContainer> containers = this.grid.getFullColumnContainers();
+		
+		// Initialize all clients with their own grid system and add triggers.
+		for (int i = 0, triggerId = 0; i < this.numClients; i++) {
+			
+			int numTriggers = 3;
+			Grid g = new Grid(this, containers.get(i));
+			Client c = new Client(this, i, g, numTriggers);
+			this.clients.add(c);
 
+			Grid clientGrid = c.getGrid().setPartitions(new int[] {2, 4});
+			ArrayList<PVector> points = clientGrid.getMiddlePartitionPoints();
+			for (int j = 0; j < c.getNumTriggers(); j++) {
+				PVector pos = points.get(j);
+				int triggerColor = color(random(255), random(255), random(255));
+				Trigger t = new Trigger(this, triggerId, pos, triggerColor);
+				this.triggers.add(t);
+				c.addTrigger(t);
+				triggerId++;
+			}
+		}
 		
-		// Initialize all triggers
-//		for (int clientId = 0, triggerId = 0; clientId < this.numClients; clientId++) {
-//			Client client = this.clients.get(clientId);
-//			int numTriggers = client.getNumTriggers();
-//			for (int i = 0; i < numTriggers; i++) {
-//				PVector pos = new PVector(100, 100);
-//				Trigger t = new Trigger(this, triggerId, pos);
-//				// These should point to the same trigger object (pass-by-reference).
-//				// Add trigger to list of all triggers.
-//				this.triggers.add(t);
-//				// Add trigger to client's trigger list.
-//				client.addTrigger(t);
-//				triggerId++;
-//			}
-//		}
-		
-		print ("Setup called.\n");
+		print ("Setup finished.\n");
+		noStroke();
 		frameRate(30);
 	}
-
+	
 	public void draw() {
 		
 		// optimize to call this only on resize event
@@ -123,7 +124,7 @@ public class ConnectServer extends PApplet{
 //		// Clear canvas on every frame.
 		background(color(34, 34, 34));
 		
-		// frameRate indicator
+		// FrameRate indicator
 		fill(255);
 		text("FPS: " + frameRate,20,20);
 
@@ -132,62 +133,58 @@ public class ConnectServer extends PApplet{
 		strokeWeight(1);
 		line(0, height / 2, width, height / 2);
 		
-		// Update the grid helper. Optimize later.
-//		this.grid.setOffsets(new int[]{marginOffset, marginOffset, marginOffset, marginOffset})
-//		.setPartitions(new int[]{numRows, numColumns})
-		this.grid.setRectBoundingBox(0, 0, width, height);
-
+		// This logic is moved to ConnectGUIManager
+		//		this.grid.setOffsets(new int[]{marginOffset, marginOffset, marginOffset, marginOffset})
+		//		.setPartitions(new int[]{numRows, numColumns})
+		
+		// Resize grid -- move logic to resize callback
+		// The main grid container is full canvas width and height
+		this.grid.setGrid(0, 0, width, height);
 		this.grid.draw();
 		
-		// Pass grid helper to animator.		
+		// Resize sub grids -- move logic to resize callback
+		// The sub grid containers are full column containers
+		ArrayList<GridContainer> containers = this.grid.getFullColumnContainers();
+		for (int i = 0; i < this.clients.size(); i++) {
+			Client c = this.clients.get(i);
+			Grid g = c.getGrid();
+			g.setGrid(containers.get(i));
+			
+			// resize triggers
+			GridContainer gc = containers.get(i);
+			ArrayList<PVector> pts = g.getMiddlePartitionPoints();
+			ArrayList<Trigger> t = c.getTriggers();
+			for (int j = 0; j < t.size(); j++) {
+				t.get(j).setPosition(pts.get(j));
+			}
+			// draw sub grid
+			g.draw(); // just for us
+		}
+		
+		// Check for and run grid animations	
 		this.gridAnimator.runAnimations();
 		
-		ArrayList<PVector> points = this.grid.getMiddlePartitionPoints();
-		points.add(0, new PVector(this.grid.getLeftMarginX(), this.grid.getMiddleY()));		
-		points.add(points.size(), new PVector(this.grid.getRightMarginX(), this.grid.getMiddleY()));
-		
-//		for (PVector point :  points) {
-//			ellipse(point.x, point.y, 15, 15);
-//		}
-//		
-		for (int i = 0, triggerId = 0; i < this.numClients; i++) {
-			Client client = this.clients.get(i);
-			int numTriggers = client.getNumTriggers();
-			PVector leftPoint = points.get(i);
-			PVector rightPoint = points.get(i+1);
-			float yPos = leftPoint.y;
-			float xPos = leftPoint.x;
-			float xDist = rightPoint.x - leftPoint.x;
-			float xInterval = xDist / (numTriggers + 1);
-
-			for (int j = 1; j <= numTriggers; j++) {
-				PVector pos = new PVector( (xInterval * j) + xPos, yPos);
-				int triggerColor = color(random(255), random(255), random(255));
-				Trigger t = new Trigger(this, triggerId, pos, triggerColor);
-				t.draw();
-//				this.triggers.add(t);
-//				client.addTrigger(t);
-				triggerId++;
+		for (Client c : this.clients) {
+			if (c.isConnected()) {
+				for (Trigger t : c.getTriggers()) {
+					t.draw();
+				}
+			}
+			else {
+				c.draw();
 			}
 		}
-
-//		
-//		for (Trigger t : this.triggers) {
-//			t.draw();
-//		}
 		
-//		 Slower logging (1 sec)
+		// Logging
 		if (frameCount % 30 == 0) {
 			println("Rows = "+this.numRows);
-			println("Columns = "+this.numColumns);
-//			println(this.grid.getPartitionPoints());
-			println(this.grid.getPartitionPointsWithMargin()); // with margin
-			
+			println("Columns = "+this.numColumns);			
 			for (Client client : this.clients) {
-				println("Client: " + client.getClientId());
+				int clientId = client.getClientId();
+				println("Client: " + clientId);
+				println("Client Triggers: " + client.getTriggers());
 			}
-			println("Clients = "+this.numClients);
-
+			println("Total Clients = "+this.numClients);
 		}
 	}
 	
