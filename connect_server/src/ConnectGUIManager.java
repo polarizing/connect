@@ -1,4 +1,8 @@
 import processing.core.PApplet;
+import processing.core.PVector;
+
+import java.util.ArrayList;
+
 import controlP5.*;
 
 // See: https://forum.processing.org/one/topic/controlp5-variable-passing-problem.html
@@ -128,9 +132,12 @@ public class ConnectGUIManager implements ControlListener{
 	
 	public void addClient(int theValue) {
 		float delta = this.server.grid.getColumnSize(this.server.grid.getColumnPartitions() + 1);
-		this.server.gridAnimator.slideIn("right", delta);
-		delta = 50;
-		this.server.gridAnimator.slideIn("top", delta);
+//		this.server.gridAnimator.slideIn(this, "right", delta, "addClientCb");
+		this.server.gridAnimator.slideOut(this, "right", 50, "addClientCb");
+
+//		delta = 50;
+//		this.server.gridAnimator.slideIn(this, "top", delta);
+		
 //		parent.println("a button event from addClient: " + theValue);
 		
 //		Controller c = cp5.getController("numColumns");
@@ -148,6 +155,27 @@ public class ConnectGUIManager implements ControlListener{
 //		parent.println("Set");
 	}
 
+	public void addClientCb () {
+		parent.println("CALLED!!!!!!");
+//		this.server.grid.setOffsets(new int[]{30, 30, 30, 30});
+//		this.server.grid.setColumnPartitions(++this.server.numColumns);
+//		ArrayList<GridContainer> containers = this.server.grid.getFullColumnContainers();
+//		Grid g = new Grid(this.parent, containers.get(containers.size() - 1)).setPartitions(new int[] {0, 4});
+//		Client c = new Client(this.parent, this.server.clients.size(), g, 3);
+//		this.server.clients.add(c);
+//		
+//		ArrayList<PVector> pts = g.getMiddlePartitionPoints();
+//		for (int i = 0; i < c.getNumTriggers(); i++) {
+//			int id = this.server.triggers.size() + i;
+//			int triggerColor = this.parent.color(this.parent.random(255), this.parent.random(255), this.parent.random(255));
+//			Trigger t = new Trigger(this.parent, id, pts.get(i), triggerColor);
+//			this.server.triggers.add(t);
+//			c.addTrigger(t);
+//		}
+//		this.server.numClients++;
+	}
+	
+	
 	public void removeClient(int theValue) {
 		Controller c = cp5.getController("numColumns");
 		Controller c2 = cp5.getController("numClients");

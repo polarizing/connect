@@ -44,7 +44,7 @@ public class ConnectServer extends PApplet{
 		/** Initialize Grid Variables **/
 		this.numColumns = 1;
 		this.numRows = 2;
-		this.marginOffset = 0;
+		this.marginOffset = 30;
 		
 		this.numClients = 1;
 		this.clients = new ArrayList<Client>();

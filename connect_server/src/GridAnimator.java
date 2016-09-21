@@ -11,6 +11,7 @@ public class GridAnimator {
 	
 	private float slideInRight;
 	private float slideInTop;
+	private float slideOutRight;
 	
 	public GridAnimator (PApplet p) {
 		this.parent = p;
@@ -18,6 +19,7 @@ public class GridAnimator {
 		this.grid = this.server.grid;
 		this.slideInRight = this.grid.getRightOffset();
 		this.slideInTop = this.grid.getTopOffset();
+		this.slideOutRight = this.grid.getRightOffset();
 	}
 	
 	public GridAnimator setGrid (Grid g) {
@@ -25,19 +27,29 @@ public class GridAnimator {
 		return this;
 	}
 	
-	public void slideIn(String direction, float delta) {
+	public void slideIn(Object scope, String direction, float delta, String cb) {
 		
 		if (direction == "right") {
-			AnimationController ctrl = new AnimationController("slideIn", direction, delta);
+			AnimationController ctrl = new AnimationController(scope, "slideIn", direction, delta, cb);
 			this.controllers.add(ctrl);
 			this.slideInRight = this.slideInRight += delta;
 		}
 		
 		if (direction == "top") {
-			AnimationController ctrl = new AnimationController("slideIn", direction, delta);
+			AnimationController ctrl = new AnimationController(scope, "slideIn", direction, delta, cb);
 			this.controllers.add(ctrl);
 			this.slideInTop = this.slideInTop += delta;
 		}
+	}
+	
+	public void slideOut(Object scope, String direction, float delta, String cb) {
+		
+		if (direction == "right") {
+			AnimationController ctrl = new AnimationController(scope, "slideOut", direction, delta, cb);
+			this.controllers.add(ctrl);
+			this.slideOutRight = this.slideOutRight -= delta;
+		}
+		
 	}
 	
 	public void runAnimations () {
@@ -83,35 +95,35 @@ public class GridAnimator {
 						}
 					}
 				}
+				
+				
+				if (controller.getAnimation() == "slideOut") {
+//					float correctOffset = this.grid.getRightOffset() - this.slideOutRight;
+//					parent.println(correctOffset);
+					if (Math.abs(this.slideOutRight - this.grid.getRightOffset()) > 0.1) {
+						float currRightOffset = this.grid.getRightOffset();
+						float lerpOffset = (this.slideOutRight - currRightOffset) / 5;
+						// Adjust grid
+						this.grid.setRightOffset(currRightOffset - lerpOffset);
+					}
+					else {
+						controller.endAnimation();
+					}
+				}
+				
+				
+				
 			}
 			
 			// Done With Animation
 			else if (controller.isDone()){
+				this.controllers.remove(ctrlIdx);
+				
 				this.slideInRight = 0;
 				this.slideInTop = 0;
-				// restore original grid **fix**
-				this.server.grid.setOffsets(new int[]{30, 30, 30, 30});
-				this.server.grid.setColumnPartitions(++this.server.numColumns);
-				this.controllers.remove(ctrlIdx);
-//				this.slideIn("right", 200);
-
-				// callback specific stuff
-				ArrayList<GridContainer> containers = this.server.grid.getFullColumnContainers();
-				Grid g = new Grid(this.parent, containers.get(containers.size() - 1)).setPartitions(new int[] {0, 4});
-				Client c = new Client(this.parent, this.server.clients.size(), g, 3);
-				this.server.clients.add(c);
+				this.slideOutRight = 0;
 				
-				ArrayList<PVector> pts = g.getMiddlePartitionPoints();
-				for (int i = 0; i < c.getNumTriggers(); i++) {
-					int id = this.server.triggers.size() + i;
-					int triggerColor = this.parent.color(this.parent.random(255), this.parent.random(255), this.parent.random(255));
-					Trigger t = new Trigger(this.parent, id, pts.get(i), triggerColor);
-					this.server.triggers.add(t);
-					c.addTrigger(t);
-				}
-				
-				this.server.numClients++;
-
+				Callback.invoke(controller.getCallbackScope(), controller.getCallback());
 
 //				if (controller.getAnimation() == "slideIn") {
 //
@@ -123,52 +135,6 @@ public class GridAnimator {
 
 			}
 		}
-		
-//		
-//		if (Math.abs(this.grid.getRightOffset() - this.slideInRight) > 0.5) {
-//			
-//			parent.println(this.grid.getRightOffset());
-//			parent.println(this.slideInRight);
-//			parent.println("diff" + (this.grid.getRightOffset() - this.slideInRight));
-//			
-//			float currRightOffset = this.grid.getRightOffset();
-//			float lerpOffset = (this.slideInRight - currRightOffset) / 5;
-//			
-//			// Adjust grid
-//			this.grid.setRightOffset(currRightOffset + lerpOffset);
-//			
-//		} else {
-//			// Restore grid to original position
-//			this.server.grid.setOffsets(new int[]{30, 30, 30, 30});
-//		}
-
-//		for (int ctrlIdx = 0; ctrlIdx < this.controllers.size(); ctrlIdx++ ) {
-//			AnimationController controller = this.controllers.get(ctrlIdx);
-//			// Animating
-//			
-//			if (controller.isReady()) {
-//				if (controller.getAnimation() == "slideIn") {
-//					float currRightOffset = this.grid.getRightOffset();
-//					float constantChange = controller.getDelta() / controller.getTotalFrameCount();
-//					this.grid.setRightOffset(currRightOffset + constantChange);
-//					controller.incrementFrameCount();
-//				}
-//			}
-//			// Done With Animation
-//			else if (controller.isDone()){
-//				// restore original grid **fix**
-//				this.server.grid.setOffsets(new int[]{30, 30, 30, 30});
-//				
-//				// Change into callback??
-////				controller.onAnimationEnd(this.server);
-//				
-//				this.server.clients.add(new Client(parent, this.server.clients.size()));
-//				this.server.grid.setColumnPartitions(++this.server.numColumns);
-//				server.numClients++;
-//				parent.println("getting in here");
-//				this.controllers.remove(ctrlIdx);
-//			}
-//		}
 	}
 	
 	
