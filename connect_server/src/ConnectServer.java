@@ -154,20 +154,6 @@ public class ConnectServer extends PApplet{
 //		// Clear canvas on every frame.
 		background(color(34, 34, 34));
 		
-		// draw button
-		fill(255,0,0);
-		stroke(200,0,0);
-//		rectMode(CENTER);
-		ellipse(width/2,height/2,250,250);
-
-		// add text to button
-		fill(230);
-		if (mousePressed == true) {
-			text("That Feels Good", width/2, height/2 + 12);
-		} else {
-			text("Click Me", width/2, height/2 + 12);
-		}
-		
 		// FrameRate indicator
 		fill(255);
 		text("FPS: " + frameRate,20,20);
@@ -184,6 +170,7 @@ public class ConnectServer extends PApplet{
 		// Resize grid -- move logic to resize callback
 		// The main grid container is full canvas width and height
 		this.grid.setGrid(0, 0, width, height);
+		this.grid.draw();
 		
 		// Resize sub grids -- move logic to resize callback
 		// The sub grid containers are full column containers
@@ -241,11 +228,7 @@ public class ConnectServer extends PApplet{
 	
 	
 	public void mousePressed(){
-		  ellipse( mouseX, mouseY, 2, 2 );
-		  text( "x: " + mouseX + " y: " + mouseY, mouseX + 2, mouseY );
 
-			// send message to spacebrew
-			sb.send( "button_pressed", true);
 		}
 	
 	public void mouseReleased() {

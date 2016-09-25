@@ -1,4 +1,4 @@
-define(["grid/GridContainer"], function(GridContainer) {
+define(["grid/GridContainer", "grid/Column", "grid/Row", "grid/Tile"], function(GridContainer, Column, Row, Tile) {
 
 	"use strict";
 
@@ -16,6 +16,8 @@ define(["grid/GridContainer"], function(GridContainer) {
             row: 0,
             column: 0
         };
+        this.columns = [];
+        this.rows = [];
         this.columnSize = 0;
         this.rowSize = 0;
         this.columnIntervals = [];
@@ -28,18 +30,21 @@ define(["grid/GridContainer"], function(GridContainer) {
         if (this.partitions.column === 0) {
             this.columnSize = this.container.width;
             this.columnIntervals = [];
+            this.columns = [];
         } else {
             this.columnSize = this.getColumnSize();
-
             this.columnIntervals = this.setColumnIntervals();
+            this.columns = this.setColumns();
         }
 
         if (this.partitions.row === 0) {
             this.rowSize = this.container.height;
             this.rowIntervals = [];
+            this.rows = [];
         } else {
             this.rowSize = this.getRowSize();
             this.rowIntervals = this.setRowIntervals();
+            this.rows = this.setRows();
         }
 
         this.setMarginBoundingBox();
@@ -61,6 +66,22 @@ define(["grid/GridContainer"], function(GridContainer) {
         return intervals;
     }
 
+    Grid.prototype.setColumns = function () {
+        var columns = [];
+        var numColumns = this.partitions.column;
+        var numPartitions = this.partitions.row;
+        var columnWidth = this.columnSize;
+
+        for (var i = 0; i < numColumns; i++) {
+            var columnOffset = i * columnWidth;
+
+            if (i === 0) columns[i] = new Column(numPartitions, this.container.x1, this.container.y1, this.container.x1 + columnWidth, this.container.y2);
+            else if (i === numColumns - 1) columns[i] = new Column(numPartitions, this.container.x1  + columnOffset, this.container.y1, this.container.x2, this.container.y2);
+            else columns[i] = new Column(numPartitions, this.container.x1 + columnOffset, this.container.y1, this.container.x1 + columnOffset + columnWidth, this.container.y2);
+        }
+        return columns;
+    }
+
     Grid.prototype.getRowSize = function() {
         var topBottomOffset = this.offsets.top + this.offsets.bottom;
         return (this.container.height - topBottomOffset) / this.partitions.row;
@@ -75,6 +96,10 @@ define(["grid/GridContainer"], function(GridContainer) {
             else intervals[i] = this.rowSize * i + this.offsets.top + this.container.y1;
         }
         return intervals;
+    }
+
+    Grid.prototype.setRows = function () {
+        //
     }
 
     Grid.prototype.getRowIntervals = function() {
@@ -141,6 +166,47 @@ define(["grid/GridContainer"], function(GridContainer) {
         this.parent.stroke(0, 0, 0);
 
     }
+
+    // really want to rewrite this to use columns class in grid ...
+    Grid.prototype.getColumnContainers = function () {
+        var containers = [];
+        for (var i = 0 ; i < this.columns; i++) {
+            containers.push( this.columns[i].toGridContainer() );
+        }
+        return containers;
+    }
+
+    Grid.prototype.getColumn = function (num) {
+        return this.columns[num];
+    }
+
+    Grid.prototype.getColumns = function () {
+        return this.columns;
+    }
+
+    Grid.prototype.getRow = function (num) {
+        return this.row[num];
+    }
+
+    Grid.prototype.getRows = function () {
+        return this.rows;
+    }
+
+    Grid.prototype.getTile = function (num) {
+
+    }
+
+    Grid.prototype.getTiles = function (num) {
+
+    }
+
+    Grid.prototype.setGrid = function (x1, y1, x2, y2) {
+        this.container = new GridContainer(x1, y1, x2, y2);
+        this.init();
+        return this;
+    }
+
+    
 
     return Grid;
 });

@@ -44,7 +44,7 @@ public class GUIManager implements ControlListener{
 		s1 = this.cp5.addSlider("numClients")
 	     .setPosition(menuX, 50)
 //	     .setWidth(100)
-	     .setRange(1, 12) // values can range from big to small as well
+	     .setRange(1, 4) // values can range from big to small as well
 //	     .setNumberOfTickMarks(201)
 	     .plugTo(this)
 	     ;
@@ -53,7 +53,7 @@ public class GUIManager implements ControlListener{
 		s2 = this.cp5.addSlider("numColumns")
 		.setPosition(menuX, 75)
 //	     .setWidth(100)
-	     .setRange(1, 12) // values can range from big to small as well
+	     .setRange(1, 1) // values can range from big to small as well
 //	     .setNumberOfTickMarks(201)
 	     .plugTo(this)
 	     ;
@@ -62,7 +62,7 @@ public class GUIManager implements ControlListener{
 		s3 = this.cp5.addSlider("numRows")
 		.setPosition(menuX, 100)
 	     .setWidth(100)
-	     .setRange(1, 12) // values can range from big to small as well
+	     .setRange(1, 24) // values can range from big to small as well
 	     .setNumberOfTickMarks(12)
 	     .plugTo(this)
 	     ;

@@ -2,11 +2,12 @@
 
 <head>
     <meta charset="UTF-8">
-    
     <!-- General JS Libraries -->
-    <script type="text/javascript" src="libraries/jquery-3.1.1.min.js"></script>
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
     <script type="text/javascript" src="libraries/underscore-min.js"></script>
     <script src="libraries/chance.js"></script>
+    <link rel="stylesheet" href="libraries/jquery.mobile-1.4.5.min.css">
+    <script src="libraries/jquery.mobile-1.4.5.min.js"></script>
     <!-- P5JS Libraries -->
     <script language="javascript" type="text/javascript" src="libraries/p5.js"></script>
     <script language="javascript" src="libraries/p5.dom.js"></script>
@@ -17,30 +18,62 @@
     <!-- Sockets / Spacebrew -->
     <script type="text/javascript" src="libraries/sb-1.4.1.min.js"></script>
     <!-- My Own Grid Library -->
-
     <script data-main="app/main" src="app/require.js"></script>
-
     <!-- CSS -->
     <link rel="stylesheet" type="text/css" href="styles/reset.css">
     <link rel="stylesheet" type="text/css" href="styles/style.css">
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.css">
     <title>connect client</title>
     <link rel="apple-touch-icon" href="/images/dj-logo.jpg">
     <meta name="viewport" content="width=device-width, height=device-height, user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0" />
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
 
 <body>
-    <div id="p5sketch">
+    <div data-role="page">
+        <div data-role="panel" data-position="right" data-display="overlay" id="mypanel" data-theme="b">
+            hi
+        </div>
+        <!-- /panel -->
+        <div id="app-container">
+            <div id="top-menu">
+                <div id="status-bar">
+                </div>
+                <div id="top-menu-list">
+                    <div class="top-menu-item item-1">
+                        menu item 1
+                    </div>
+                    <div class="top-menu-item item-2">
+                        menu item 2
+                    </div>
+                    <div class="top-menu-item item-3">
+                        menu item 3
+                    </div>
+                    <div class="top-menu-item item-4">
+                        <div class="navigation"><a href="#mypanel"><i class="fa fa-bars" aria-hidden="true"></i></a></div>
+                    </div>
+                </div>
+            </div>
+            <div id="content">
+                <div id="p5sketch">
+                </div>
+            </div>
+            <div id="bottom-menu">
+                hi
+            </div>
+        </div>
     </div>
-    <p id="update">Some other HTML</p>
-        <div id="container">
+    <!--     <p id="update">Some other HTML</p>
+    <p id="update2">Some other HTML</p>
+    <div id="container">
         <h1>Click to send a message<br/>to Spacebrew</h1>
         <a class="button" id="buttonMsg">Click Me</a>
         </br>
         </br>
         <div id="name">Trying to connect</div>
-    </div>
+    </div> -->
 </body>
 
 </html>
