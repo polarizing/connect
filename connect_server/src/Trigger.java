@@ -44,7 +44,7 @@ public class Trigger {
 		this.parent.noFill();
 		this.parent.stroke(this.color);
 		this.parent.strokeWeight(new Float(1.5));
-		this.parent.ellipse(this.pos.x, this.pos.y, 8, 8);
+		this.parent.ellipse(this.pos.x, this.pos.y, 10, 10);
 		this.parent.fill(255);
 		this.parent.stroke(1);
 		this.parent.strokeWeight(1);

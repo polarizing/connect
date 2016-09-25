@@ -21,7 +21,7 @@ public class Client {
 	
 	public Client(PApplet p, int id, Grid g, int numTriggers) {
 		this.parent = p;
-		this.clientConnected = false;
+		this.clientConnected = true;
 		this.clientId = id;
 		this.numTriggers = numTriggers;
 		this.triggers = new ArrayList<Trigger>();

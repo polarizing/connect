@@ -1,5 +1,8 @@
 import processing.core.PApplet;
+import processing.core.PGraphics;
 import processing.core.PVector;
+import processing.opengl.PGraphicsOpenGL;
+import peasy.*;
 
 import java.util.List;
 
@@ -10,6 +13,9 @@ import java.util.ArrayList;
 
 // Used to detect frame resize event.
 import java.awt.event.*;
+
+// Sockets
+import spacebrew.*;
 
 /**
  * The main class for the ConnectIO Server.
@@ -23,20 +29,30 @@ public class ConnectServer extends PApplet{
 	/** ConnectIO Instance Variables **/
 	
 	/** Helper Classes **/
-	private ConnectGUIManager gui;
+	private GUIManager gui;
 	public Grid grid;
 	public GridAnimator gridAnimator;
 	
 	/** Grid Variables **/
 	public int numColumns;
 	public int numRows;
-	public int marginOffset;
-	public int rightOffset;
-	public boolean isAnimating = true;
+	public int marginOffset;	
 	
 	public int numClients;
 	public List<Client> clients;
 	public List<Trigger> triggers;
+	
+	/** Socket Variables **/
+
+	public String server="localhost";
+	public String name="Connect Sockets Server";
+	public String description ="Connect Spacebrew Socket Server";
+	
+	public Spacebrew sb;
+	
+	public int color_on = color(255, 255, 50);
+	public int color_off = color(255, 255, 255);
+	int currentColor = color_off;
 	
 	/** Constructor to setup the application. */
 	public ConnectServer() {
@@ -58,10 +74,10 @@ public class ConnectServer extends PApplet{
 	 */
 	public void settings() {
 		print ("\nSettings called.\n");
-		size(900, 600);
+		size(900, 600, P3D);
 		// use P2D for OpenGL faster processing (by a lot, especially for lines ...)
-		smooth(4);
-//		fullScreen();
+//		smooth(4);
+//		fullScreen(P2D);
 	}
 
 	public List<Client> getClients() {
@@ -73,12 +89,12 @@ public class ConnectServer extends PApplet{
 	 * and the initial display.
 	 */
 	public void setup() {
-
+//		  
 		// Sets window to be resizable.
 		this.surface.setResizable(true);
 
 		// Initialize GUI
-		this.gui = new ConnectGUIManager(this);
+		this.gui = new GUIManager(this);
 
 		// Initialize and Setup Grid
 		this.grid = new Grid(this, 0, 0, width, height);
@@ -90,6 +106,19 @@ public class ConnectServer extends PApplet{
 		
 		// Create a list of GridContainers for each column
 		ArrayList<GridContainer> containers = this.grid.getFullColumnContainers();
+		// instantiate the spacebrewConnection variable
+		sb = new Spacebrew( this );
+
+		// declare your publishers
+		sb.addPublish( "button_pressed", "boolean", true ); 
+
+
+		// declare your subscribers
+		sb.addSubscribe( "change_background", "boolean" );
+
+		// connect to spacebre
+		sb.connect(server, name, description );
+		
 		
 		// Initialize all clients with their own grid system and add triggers.
 		for (int i = 0, triggerId = 0; i < this.numClients; i++) {
@@ -99,7 +128,7 @@ public class ConnectServer extends PApplet{
 			Client c = new Client(this, i, g, numTriggers);
 			this.clients.add(c);
 
-			Grid clientGrid = c.getGrid().setPartitions(new int[] {2, 4});
+			Grid clientGrid = c.getGrid().setPartitions(new int[] {1, 4});
 			ArrayList<PVector> points = clientGrid.getMiddlePartitionPoints();
 			for (int j = 0; j < c.getNumTriggers(); j++) {
 				PVector pos = points.get(j);
@@ -113,16 +142,31 @@ public class ConnectServer extends PApplet{
 		
 		print ("Setup finished.\n");
 		noStroke();
-		frameRate(30);
+		frameRate(32);
+		
 	}
 	
 	public void draw() {
 		
 		// optimize to call this only on resize event
 		gui.resize();
-
+		 
 //		// Clear canvas on every frame.
 		background(color(34, 34, 34));
+		
+		// draw button
+		fill(255,0,0);
+		stroke(200,0,0);
+//		rectMode(CENTER);
+		ellipse(width/2,height/2,250,250);
+
+		// add text to button
+		fill(230);
+		if (mousePressed == true) {
+			text("That Feels Good", width/2, height/2 + 12);
+		} else {
+			text("Click Me", width/2, height/2 + 12);
+		}
 		
 		// FrameRate indicator
 		fill(255);
@@ -140,7 +184,6 @@ public class ConnectServer extends PApplet{
 		// Resize grid -- move logic to resize callback
 		// The main grid container is full canvas width and height
 		this.grid.setGrid(0, 0, width, height);
-		this.grid.draw();
 		
 		// Resize sub grids -- move logic to resize callback
 		// The sub grid containers are full column containers
@@ -155,6 +198,14 @@ public class ConnectServer extends PApplet{
 			ArrayList<PVector> pts = g.getMiddlePartitionPoints();
 			ArrayList<Trigger> t = c.getTriggers();
 			for (int j = 0; j < t.size(); j++) {
+				PVector pos = pts.get(j);
+				if (j == 0) {
+					pos.x = pos.x - (g.getColumnSize() / 3 );
+				}
+				if (j == t.size() - 1) {
+					pos.x = pos.x + (g.getColumnSize() / 3 );
+				};
+				
 				t.get(j).setPosition(pts.get(j));
 			}
 			// draw sub grid
@@ -176,26 +227,48 @@ public class ConnectServer extends PApplet{
 		}
 		
 		// Logging
-		if (frameCount % 30 == 0) {
-			println("Rows = "+this.numRows);
-			println("Columns = "+this.numColumns);			
-			for (Client client : this.clients) {
-				int clientId = client.getClientId();
-				println("Client: " + clientId);
-				println("Client Triggers: " + client.getTriggers());
-			}
-			println("Total Clients = "+this.numClients);
-		}
+//		if (frameCount % 30 == 0) {
+//			println("Rows = "+this.numRows);
+//			println("Columns = "+this.numColumns);			
+//			for (Client client : this.clients) {
+//				int clientId = client.getClientId();
+//				println("Client: " + clientId);
+//				println("Client Triggers: " + client.getTriggers());
+//			}
+//			println("Total Clients = "+this.numClients);
+//		}
 	}
 	
 	
 	public void mousePressed(){
 		  ellipse( mouseX, mouseY, 2, 2 );
 		  text( "x: " + mouseX + " y: " + mouseY, mouseX + 2, mouseY );
+
+			// send message to spacebrew
+			sb.send( "button_pressed", true);
 		}
 	
+	public void mouseReleased() {
+		// send message to spacebrew
+		sb.send( "button_pressed", false);
+	}
+
+	public void mouseDragged() {
+
+	}
 	public void initTriggers() {
 		
+	}
+	
+	public void onBooleanMessage( String name, boolean value ){
+		println("got bool message " + name + " : " + value); 
+	
+		// update background color
+		if (value == true) {
+			currentColor = color_on;
+		} else {
+			currentColor = color_off;
+		}
 	}
 	
 	/**

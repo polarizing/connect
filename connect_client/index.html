@@ -1,0 +1,46 @@
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    
+    <!-- General JS Libraries -->
+    <script type="text/javascript" src="libraries/jquery-3.1.1.min.js"></script>
+    <script type="text/javascript" src="libraries/underscore-min.js"></script>
+    <script src="libraries/chance.js"></script>
+    <!-- P5JS Libraries -->
+    <script language="javascript" type="text/javascript" src="libraries/p5.js"></script>
+    <script language="javascript" src="libraries/p5.dom.js"></script>
+    <script language="javascript" src="libraries/p5.sound.js"></script>
+    <!-- iPhone Helper Libraries -->
+    <script type="text/javascript" src="libraries/shake-event.js"></script>
+    <script type="text/javascript" src="libraries/gyro.js"></script>
+    <!-- Sockets / Spacebrew -->
+    <script type="text/javascript" src="libraries/sb-1.4.1.min.js"></script>
+    <!-- My Own Grid Library -->
+
+    <script data-main="app/main" src="app/require.js"></script>
+
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="styles/reset.css">
+    <link rel="stylesheet" type="text/css" href="styles/style.css">
+    <title>connect client</title>
+    <link rel="apple-touch-icon" href="/images/dj-logo.jpg">
+    <meta name="viewport" content="width=device-width, height=device-height, user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+</head>
+
+<body>
+    <div id="p5sketch">
+    </div>
+    <p id="update">Some other HTML</p>
+        <div id="container">
+        <h1>Click to send a message<br/>to Spacebrew</h1>
+        <a class="button" id="buttonMsg">Click Me</a>
+        </br>
+        </br>
+        <div id="name">Trying to connect</div>
+    </div>
+</body>
+
+</html>
