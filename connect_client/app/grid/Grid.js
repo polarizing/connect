@@ -1,6 +1,6 @@
 define(["grid/GridContainer", "grid/Column", "grid/Row", "grid/Tile"], function(GridContainer, Column, Row, Tile) {
 
-	"use strict";
+    "use strict";
 
     function Grid(sketch, x1, y1, x2, y2) {
         this.parent = sketch;
@@ -66,19 +66,28 @@ define(["grid/GridContainer", "grid/Column", "grid/Row", "grid/Tile"], function(
         return intervals;
     }
 
-    Grid.prototype.setColumns = function () {
+    Grid.prototype.setColumns = function() {
         var columns = [];
         var numColumns = this.partitions.column;
         var numPartitions = this.partitions.row;
         var columnWidth = this.columnSize;
 
+        // without margin
+        // for (var i = 0; i < numColumns; i++) {
+        //     var columnOffset = i * columnWidth;
+        //     if (i === 0) columns[i] = new Column(numPartitions, this.container.x1, this.container.y1, this.container.x1 + columnWidth, this.container.y2);
+        //     else if (i === numColumns - 1) columns[i] = new Column(numPartitions, this.container.x1 + columnOffset, this.container.y1, this.container.x2, this.container.y2);
+        //     else columns[i] = new Column(numPartitions, this.container.x1 + columnOffset, this.container.y1, this.container.x1 + columnOffset + columnWidth, this.container.y2);
+        // }
+
         for (var i = 0; i < numColumns; i++) {
             var columnOffset = i * columnWidth;
-
-            if (i === 0) columns[i] = new Column(numPartitions, this.container.x1, this.container.y1, this.container.x1 + columnWidth, this.container.y2);
-            else if (i === numColumns - 1) columns[i] = new Column(numPartitions, this.container.x1  + columnOffset, this.container.y1, this.container.x2, this.container.y2);
-            else columns[i] = new Column(numPartitions, this.container.x1 + columnOffset, this.container.y1, this.container.x1 + columnOffset + columnWidth, this.container.y2);
+            if (i === 0) columns[i] = new Column(numPartitions, this.container.x1 + this.offsets.left, this.container.y1 + this.offsets.top, this.container.x1 + columnWidth + this.offsets.left, this.container.y2 - this.offsets.bottom);
+            else if (i === numColumns - 1) columns[i] = new Column(numPartitions, this.container.x1 + columnOffset + this.offsets.left, this.container.y1 + this.offsets.top, this.container.x2 - this.offsets.right, this.container.y2 - this.offsets.bottom);
+            else columns[i] = new Column(numPartitions, this.container.x1 + columnOffset + this.offsets.left, this.container.y1 + this.offsets.top, this.container.x1 + columnOffset + columnWidth + this.offsets.left, this.container.y2 - this.offsets.bottom);
         }
+
+        console.log(columns);
         return columns;
     }
 
@@ -98,7 +107,7 @@ define(["grid/GridContainer", "grid/Column", "grid/Row", "grid/Tile"], function(
         return intervals;
     }
 
-    Grid.prototype.setRows = function () {
+    Grid.prototype.setRows = function() {
         //
     }
 
@@ -145,68 +154,82 @@ define(["grid/GridContainer", "grid/Column", "grid/Row", "grid/Tile"], function(
         return this.marginContainer;
     }
 
-    Grid.prototype.draw = function() {
+    Grid.prototype.draw = function(opts) {
         // this.parent.rect(100,100,30,30);
-        this.parent.stroke(0);
-        for (var i = 0; i < this.columnIntervals.length; i++) {
-            this.parent.line(this.columnIntervals[i], this.container.y1, this.columnIntervals[i], this.container.y2);
-        };
-        for (var i = 0; i < this.rowIntervals.length; i++) {
-            this.parent.line(this.container.x1, this.rowIntervals[i], this.container.x2, this.rowIntervals[i]);
-        };
+        var lineColor = 'rgb(0, 0, 0)';
+        if (opts.color) {
+            lineColor = opts.color.lines ? opts.color.lines : 'rgb(0, 0, 0)';
+        }
+        this.parent.stroke(lineColor);
+
+        if (opts.column) {
+            for (var i = 0; i < this.columnIntervals.length; i++) {
+                this.parent.line(this.columnIntervals[i], this.container.y1, this.columnIntervals[i], this.container.y2);
+            };
+        }
+        if (opts.row) {
+            for (var i = 0; i < this.rowIntervals.length; i++) {
+                this.parent.line(this.container.x1, this.rowIntervals[i], this.container.x2, this.rowIntervals[i]);
+            };
+        }
 
         // Draw margin offsets
-
-        this.parent.stroke(255, 0, 0);
-        this.parent.line(this.container.x1, this.container.y1 + this.offsets.top, this.container.x2, this.container.y1 + this.offsets.top);
-        this.parent.line(this.container.x1 + this.offsets.left, this.container.y1, this.container.x1 + this.offsets.left, this.container.y2);
-        this.parent.line(this.container.x1, this.container.y2 - this.offsets.bottom, this.container.x2, this.container.y2 - this.offsets.bottom);
-        this.parent.line(this.container.x2 - this.offsets.right, this.container.y1, this.container.x2 - this.offsets.right, this.container.y2);
+        if (opts.margin) {
+            var marginColor = opts.color.margin ? opts.color.margin : 'rgb(255, 0, 0)'
+            this.parent.stroke(marginColor);
+            this.parent.line(this.container.x1, this.container.y1 + this.offsets.top, this.container.x2, this.container.y1 + this.offsets.top);
+            this.parent.line(this.container.x1 + this.offsets.left, this.container.y1, this.container.x1 + this.offsets.left, this.container.y2);
+            this.parent.line(this.container.x1, this.container.y2 - this.offsets.bottom, this.container.x2, this.container.y2 - this.offsets.bottom);
+            this.parent.line(this.container.x2 - this.offsets.right, this.container.y1, this.container.x2 - this.offsets.right, this.container.y2);
+        }
 
         this.parent.stroke(0, 0, 0);
 
     }
 
     // really want to rewrite this to use columns class in grid ...
-    Grid.prototype.getColumnContainers = function () {
+    Grid.prototype.getColumnContainers = function() {
         var containers = [];
-        for (var i = 0 ; i < this.columns; i++) {
-            containers.push( this.columns[i].toGridContainer() );
+        for (var i = 0; i < this.columns; i++) {
+            containers.push(this.columns[i].toGridContainer());
         }
         return containers;
     }
 
-    Grid.prototype.getColumn = function (num) {
+    Grid.prototype.getColumn = function(num) {
         return this.columns[num];
     }
 
-    Grid.prototype.getColumns = function () {
+    Grid.prototype.getColumns = function() {
         return this.columns;
     }
 
-    Grid.prototype.getRow = function (num) {
+    Grid.prototype.getRow = function(num) {
         return this.row[num];
     }
 
-    Grid.prototype.getRows = function () {
+    Grid.prototype.getRows = function() {
         return this.rows;
     }
 
-    Grid.prototype.getTile = function (num) {
+    Grid.prototype.getTile = function(num) {
 
     }
 
-    Grid.prototype.getTiles = function (num) {
+    Grid.prototype.getTiles = function(num) {
 
     }
 
-    Grid.prototype.setGrid = function (x1, y1, x2, y2) {
+    Grid.prototype.setGrid = function(x1, y1, x2, y2) {
         this.container = new GridContainer(x1, y1, x2, y2);
         this.init();
         return this;
     }
 
-    
+    Grid.prototype.getGrid = function () {
+        return this.container;
+    }
+
 
     return Grid;
 });

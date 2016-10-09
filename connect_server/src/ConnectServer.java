@@ -116,9 +116,8 @@ public class ConnectServer extends PApplet{
 		// declare your subscribers
 		sb.addSubscribe( "change_background", "boolean" );
 
-		// connect to spacebre
+		// connect to spacebrew
 		sb.connect(server, name, description );
-		
 		
 		// Initialize all clients with their own grid system and add triggers.
 		for (int i = 0, triggerId = 0; i < this.numClients; i++) {
@@ -142,7 +141,7 @@ public class ConnectServer extends PApplet{
 		
 		print ("Setup finished.\n");
 		noStroke();
-		frameRate(32);
+		frameRate(30);
 		
 	}
 	
@@ -157,7 +156,7 @@ public class ConnectServer extends PApplet{
 		// FrameRate indicator
 		fill(255);
 		text("FPS: " + frameRate,20,20);
-
+		
 		// Draw initial line in middle of screen.
 		stroke(45, 45, 45);
 		strokeWeight(1);

@@ -43,18 +43,14 @@ public class GUIManager implements ControlListener{
 
 		s1 = this.cp5.addSlider("numClients")
 	     .setPosition(menuX, 50)
-//	     .setWidth(100)
 	     .setRange(1, 4) // values can range from big to small as well
-//	     .setNumberOfTickMarks(201)
 	     .plugTo(this)
 	     ;
 		  this.parent.println("here:" + this.server.numClients);
 
 		s2 = this.cp5.addSlider("numColumns")
 		.setPosition(menuX, 75)
-//	     .setWidth(100)
-	     .setRange(1, 1) // values can range from big to small as well
-//	     .setNumberOfTickMarks(201)
+	     .setRange(1, 4) // values can range from big to small as well
 	     .plugTo(this)
 	     ;
 		  this.parent.println("here:" + this.server.numColumns);
@@ -131,47 +127,29 @@ public class GUIManager implements ControlListener{
 	}
 	
 	public void addClient(int theValue) {
-		this.server.sb.send( "button_pressed", true ); 
-//		float delta = this.server.grid.getColumnSize(this.server.grid.getColumnPartitions() + 1);
-//		this.server.gridAnimator.slideIn(this, "right", 100, "emptyCb");
-//		this.server.gridAnimator.slideOut(this, "right", 100, "emptyCb");
-
-//		float delta = 75;
-//		this.server.gridAnimator.slideIn(this, "top", delta, "emptyCb");
-//		this.server.gridAnimator.slideIn(this, "right", delta, "emptyCb");
-//		this.server.gridAnimator.slideIn(this, "bottom", delta, "emptyCb");
-//		this.server.gridAnimator.slideIn(this, "left", delta, "emptyCb2");
-//		
-//		delta = this.server.grid.getColumnSize(this.server.grid.getColumnPartitions() + 1);
-//		this.server.gridAnimator.slideIn(this, "right", delta, "addClientCb");
-//		
-//		parent.println("a button event from addClient: " + theValue);
+//		this.server.sb.send( "button_pressed", true ); 
 		
-//		Controller c = cp5.getController("numColumns");
-//		Controller c2 = cp5.getController("numClients");
-//		int toSet = (int) c.getValue() + 1;
-//		float max = c.getMax();
-//		if (toSet > max) return;
-//		else {
-//			c.setValue(toSet);
-//			this.server.numClients = toSet;
-//		}
-//		c2.setValue(toSet);
+		float delta = 75;
+		this.server.gridAnimator.slideIn(this, "top", delta, "emptyCb");
+		this.server.gridAnimator.slideIn(this, "right", delta, "emptyCb");
+		this.server.gridAnimator.slideIn(this, "bottom", delta, "emptyCb");
+		this.server.gridAnimator.slideIn(this, "left", delta, "emptyCb2");
 		
-//		parent.println(toSet);
-//		parent.println("Set");
 	}
 	
 	public void emptyCb () {
 	}
 	
 	public void emptyCb2 () {
+		
 		float delta = this.server.grid.getColumnSize(this.server.grid.getColumnPartitions() + 1);
 		this.server.gridAnimator.slideIn(this, "right", delta, "addClientCb");
+		
 	}
 
 	public void addClientCb () {
 		parent.println("CALLED!!!!!!");
+		
 		this.server.grid.setOffsets(new int[]{30, 30, 30, 30});
 		this.server.grid.setColumnPartitions(++this.server.numColumns);
 		ArrayList<GridContainer> containers = this.server.grid.getFullColumnContainers();
@@ -188,6 +166,18 @@ public class GUIManager implements ControlListener{
 			c.addTrigger(t);
 		}
 		this.server.numClients++;
+		
+		// set for GUI
+		Controller c1 = cp5.getController("numColumns");
+		Controller c2 = cp5.getController("numClients");
+		int toSet = (int) c1.getValue() + 1;
+		float max = c1.getMax();
+		if (toSet > max) return;
+		else {
+			c1.setValue(toSet);
+			this.server.numClients = toSet;
+		}
+		c2.setValue(toSet);
 	}
 	
 	

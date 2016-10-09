@@ -96,7 +96,7 @@ public class GridAnimator {
 						
 						if ( this.slideInRight - this.grid.getRightOffset() > 0.1) {
 							float currRightOffset = this.grid.getRightOffset();
-							float lerpOffset = ( this.slideInRight - currRightOffset) / 5; // 5 is speed
+							float lerpOffset = ( this.slideInRight - currRightOffset) / 5; // 4 is speed
 							parent.println(currRightOffset);
 							// Adjust grid
 							this.grid.setRightOffset(currRightOffset + lerpOffset);
@@ -110,7 +110,7 @@ public class GridAnimator {
 						 parent.println("running slideinbottom animation");
 							if ( this.slideInBottom - this.grid.getBottomOffset() > 0.1) {
 								float currBottomOffset = this.grid.getBottomOffset();
-								float lerpOffset = (this.slideInBottom - currBottomOffset) / 5; // 5 is speed
+								float lerpOffset = (this.slideInBottom - currBottomOffset) / 5; // 4 is speed
 								// Adjust grid
 								this.grid.setBottomOffset(currBottomOffset + lerpOffset);
 							} 
@@ -123,7 +123,7 @@ public class GridAnimator {
 						 parent.println("running slideinleft animation");
 							if (this.slideInLeft - this.grid.getLeftOffset() > 0.1) {
 								float currLeftOffset = this.grid.getLeftOffset();
-								float lerpOffset = (this.slideInLeft - currLeftOffset) / 5; // 5 is speed
+								float lerpOffset = (this.slideInLeft - currLeftOffset) / 5; // 4 is speed
 								// Adjust grid
 								this.grid.setLeftOffset(currLeftOffset + lerpOffset);
 							} 
@@ -142,7 +142,7 @@ public class GridAnimator {
 					if (controller.getDirection() == "right") {
 						if ( this.slideOutRight - this.grid.getRightOffset() > 0.01) {
 							float currRightOffset = this.grid.getRightOffset();
-							float lerpOffset = (this.slideOutRight - currRightOffset) / 5;
+							float lerpOffset = (this.slideOutRight - currRightOffset) / 4;
 							// Adjust grid
 //							parent.println(currRightOffset);
 							this.grid.setRightOffset(currRightOffset - lerpOffset);
@@ -163,9 +163,7 @@ public class GridAnimator {
 
 				this.controllers.remove(ctrlIdx);
 				parent.println("Done");
-//				this.slideInTop = 0;
-//				this.slideOutRight = 0;
-//				
+				
 				Callback.invoke(controller.getCallbackScope(), controller.getCallback());
 
 //				if (controller.getAnimation() == "slideIn") {
