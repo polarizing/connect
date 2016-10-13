@@ -57,6 +57,18 @@ define(['config/Colors', 'config/Config', 'game/PitchTile'], function(Colors, Co
         return this.column;
     }
 
+    PitchController.prototype.getNotation = function () {
+        var self = this;
+        var index;
+        this.tiles.forEach(function (tile, idx) {
+            if (tile.y1 <= self.pitchY && tile.y2 >= self.pitchY) {
+                index = idx;
+                return idx;
+            }
+        })
+        return index;
+    }
+
     PitchController.prototype.updatePitchY = function(yPos) {
         this.pitchY = yPos;
     }
@@ -118,6 +130,7 @@ define(['config/Colors', 'config/Config', 'game/PitchTile'], function(Colors, Co
         this.updatePitchY(touchY);
         this.updatePitchY(touchY);
 
+        return true;
     }
 
     return PitchController;

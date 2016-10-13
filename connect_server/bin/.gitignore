@@ -3,3 +3,9 @@
 /HarpChord.class
 /Marimba.class
 /ClientManager.class
+/Harpsichord.class
+/PluckedSynth.class
+/SocketManager.class
+/ConnectServer.class
+/Organ.class
+/SteelDrum.class

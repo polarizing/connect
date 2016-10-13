@@ -37,36 +37,34 @@ public class ConnectServer extends PApplet{
 	
 	public int numClients;
 	public List<Client> clients;
-	public List<Trigger> triggers;
-	
-	/** Socket Variables **/
-	public String server="localhost";
-	public String name="Connect Sockets Server";
-	public String description ="Connect Spacebrew Socket Server";
-	
-	public Spacebrew sb;
-	
-	public int color_on = color(255, 255, 50);
-	public int color_off = color(255, 255, 255);
-	int currentColor = color_off;
 	
 	/** PeasyCam **/
 	public PeasyCam cam;
 	
 	/** Minim **/
-	Minim minim;
-	AudioPlayer song;
+	public Minim minim;
+	public AudioPlayer song;
 	
+	/** Spacebrew Sockets **/
+	public Spacebrew sb;
+
 	/** Grid Lengths **/
 	public int variableLength;
 	
+	
 	/** Game Controller **/
 	/** move logic later **/
-	public NoteManager nm;
+	public NoteManager noteM;
 	public boolean[] beats;
 	
 	/** Sound Manager **/
-	public SoundManager sm;
+	public SoundManager soundM;
+	
+	/** Client Manager **/
+	public ClientManager clientM;
+	
+	/** Socket Manager **/
+	public SocketManager socketM;
 	
 	/**
 	 * Debugging
@@ -78,11 +76,6 @@ public class ConnectServer extends PApplet{
 	Row r1;
 	Tile t1;
 	
-	/**
-	 * For Fun
-	 */
-	Grid container;
-	
 	/** Constructor to setup the application. */
 	public ConnectServer() {
 		
@@ -92,10 +85,7 @@ public class ConnectServer extends PApplet{
 		this.marginOffset = 30;
 		
 		this.numClients = 4;
-		this.clients = new ArrayList<Client>();
-		this.triggers = new ArrayList<Trigger>();
 		this.variableLength = 400;
-		this.nm = new NoteManager(this);
 		this.beats = new boolean[4];
 		print ("Starting ConnectIO application ...");
 	}
@@ -114,9 +104,6 @@ public class ConnectServer extends PApplet{
 //		fullScreen(P3D);
 	}
 
-	public List<Client> getClients() {
-		return this.clients;
-	}
 	/**
 	 * setup() function is run once, when the program starts. 
 	 * It's used to define initial environment properties such as screen size
@@ -126,9 +113,19 @@ public class ConnectServer extends PApplet{
 //		
 		// Sets window to be resizable.
 		this.surface.setResizable(true);
-
-		// Initialize GUI
+		
+		// Initialize Minim
+		this.minim = new Minim(this);
+		
+		// Initialize Spacebrew
+		this.sb = new Spacebrew(this);
+		
+		// Initialize Managers
 		this.gui = new GUIManager(this);
+		this.noteM = new NoteManager(this);
+		this.soundM = new SoundManager(this);
+		this.clientM = new ClientManager(this);
+		this.socketM = new SocketManager(this);
 
 		// Initialize PeasyCam
 		cam = new PeasyCam(this, width / 2, height / 2, 0, 900);
@@ -141,27 +138,11 @@ public class ConnectServer extends PApplet{
 		
 		// Initialize Grid Animator
 		this.gridAnimator = new GridAnimator(this);
-
-		// Initialize Minim
-		this.minim = new Minim(this);
 		
-		// Initialize Sound Manager
-		this.sm = new SoundManager(this);
-		
-		// instantiate the spacebrewConnection variable
-		sb = new Spacebrew( this );
-
-		// declare your publishers
-		sb.addPublish( "button_pressed", "boolean", true ); 
-
-		// declare your subscribers
-		sb.addSubscribe( "beatNotationChange", "string" );
-
-		// connect to spacebrew
-		sb.connect(server, name, description );
-		
+		frameRate(60);
+		print ("Loading sounds ...");
+		delay(3000);
 		print ("Setup finished.\n");
-		frameRate(120);
 		
 	}
 	
@@ -170,7 +151,7 @@ public class ConnectServer extends PApplet{
 		// Clear canvas.
 		  background(0);
 		  
-		  this.sm.play();
+		  this.soundM.play();
 		  
 		  // 3d z-axis
 //		  Container gc = this.grid.getContainer();
@@ -208,23 +189,10 @@ public class ConnectServer extends PApplet{
 			text("FPS: " + frameRate,20,20);
 			text("X: " + mouseX + " Y: " + mouseY, 20, 40);
 		  this.cam.endHUD();
-		
-	}
-	
-	
-	public void mousePressed(){
-
-	}
-	
-	public void mouseReleased() {
-		// send message to spacebrew
-//		sb.send( "button_pressed", false);
-	}
-
-	public void mouseDragged() {
-
-	}
-	public void initTriggers() {
+		  
+		  if (frameCount % 120 == 0) {
+			  this.clientM.checkConnections();
+		  }
 		
 	}
 	
@@ -233,31 +201,51 @@ public class ConnectServer extends PApplet{
 		
 	}
 	
-	public void onStringMessage (String name, String string) {
-		println("got string message " + name + " : " + string);
+	public void onStringMessage (String name, String value) {
+		println("got string message " + name + " : " + value);
 		
-		// check for name
-		if ( name.equals("beatNotationChange")) {
-			// do something
-			
-			nm.updateNotation(string);
-//			println("going to do something here");
-			for(int i = 0; i < string.length(); i++)
-			{
-			   char c = string.charAt(i);
-			   if (c == '-') {
-				   this.beats[i] = false;
-			   } else {
-				   this.beats[i] = true;
-			   }
+		if ( name.equals("connect")) {
+			String[] valueArray = value.split("#");
+			String state = valueArray[0]; // registered, unregistered
+			String id = valueArray[1];
+			String data = valueArray[2];
+			if (state.equals("ping")) {
+				this.clientM.setClientPing(id, millis());
+			} 
+			else if (state.equals("unregistered")) {
+				this.clientM.addClient(id);
 			}
-//			println(this.beats);
-			
-		}
+			else if (state.equals("rhythm")) {
+				this.clientM.setClientRhythm(id, data);
+
+			}
+			else if (state.equals("melody")) {
+				this.clientM.setClientHarmonyPitchInterval(id, data);
+			}
+			else if (state.equals("refrain")) {
+				this.clientM.setClientRefrainPitchInterval(id, data);
+			}
+			else if (state.equals("instrument")) {
+				this.clientM.setClientInstrument(id, data);
+			}
+		} 
+	}
+	
+	public void mousePressed(){
+
+	}
+	
+	public void mouseReleased() {
+
+		
+	}
+
+	public void mouseDragged() {
+
 	}
 	
 	/**
-	 * Starts a PApplet application, and tells it to use this class, ConnectIO, as the program to run. 
+	 * Starts a PApplet application, and tells it to use this class, ConnectServer, as the program to run. 
 	 * This is done by calling PApplet's main method and giving it the name of this class as a parameter.
 	 * The class constructor is called first, then settings(), setup(), and the draw() function are called
 	 * in that respective order.

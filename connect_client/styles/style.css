@@ -16,7 +16,7 @@ body {
 /* just to be sure these are full screen*/
 
 canvas {
-
+  display:none;
    pointer-events:none;
     /*  height: 100vh; 
   width: 100vw; 

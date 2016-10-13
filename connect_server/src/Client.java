@@ -11,28 +11,90 @@ import processing.core.PApplet;
  */
 public class Client {
 	
-	private PApplet parent;
-	private int clientId;
-//	private String clientSocketId;
+	private PApplet parent;	
+	private ConnectServer server;
+	private String clientId;
 	private boolean clientConnected;
-	private Grid grid;
+	private float startPing;
+	private float endPing;
 	
-	public Client(PApplet p, int id) {
+	public String rhythm;
+	public String refrain;
+	public String harmonyPitchInterval;
+	public String refrainPitchInterval;
+	
+	public String instrument;
+	
+	public Client(PApplet p, String id) {
 		this.parent = p;
+		this.server = (ConnectServer) p;
 		this.clientConnected = true;
 		this.clientId = id;
+		this.startPing = 0;
+		this.endPing = 0;
+		this.rhythm = "----";
+		this.refrain = "----";
+		this.instrument = "bassSynth";
+		this.harmonyPitchInterval = "4";
+		this.refrainPitchInterval = "4";
 	}
 	
-	public Grid getGrid() {
-		return this.grid;
-	}
-	
-	public int getClientId() {
+	public String getClientId() {
 		return this.clientId;
+	}
+	
+	public void setRhythm(String rhythm) {
+		this.rhythm = rhythm;
+		this.refrain = this.rhythm;
+	}
+	
+	public void setInstrument (String instrument) {
+		this.instrument = instrument;
+		parent.println("instrument set");
+	}
+	
+	public String getInstrument () {
+		return this.instrument;
+	}
+	
+	public void setHarmonyPitchInterval (String harmonyPitchInterval) {
+		this.harmonyPitchInterval = harmonyPitchInterval;
+	}
+	
+	public void setRefrainPitchInterval (String refrainPitchInterval) {
+		this.refrainPitchInterval = refrainPitchInterval;
+	}
+	
+	public String getRhythm() {
+		return this.rhythm;
+	}
+	
+	public String getRefrain() {
+		return this.refrain;
+	}
+	
+	public String getHarmonyPitchInterval () {
+		return this.harmonyPitchInterval;
+	}
+	
+	public String getRefrainPitchInterval () {
+		return this.refrainPitchInterval;
 	}
 	
 	public boolean isConnected () {
 		return this.clientConnected;
+	}
+	
+	public float getPing () {
+		return endPing - startPing;
+	}
+	
+	public void setStartPing (float currTime) {
+		startPing = currTime;
+	}
+	
+	public void setEndPing (float currTime) {
+		endPing = currTime;
 	}
 	
 	public void setConnected () {
@@ -44,7 +106,7 @@ public class Client {
 	}
 	
 	public String toString() {
-		return "A client!";
+		return "A client: " + this.clientId;
 	}
 	
 	public void draw () {

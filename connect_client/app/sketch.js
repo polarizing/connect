@@ -122,25 +122,36 @@ define(['grid/Grid', 'sockets/sb', 'game/BeatTile', 'game/PitchTile', 'game/Pitc
 
         sketch.touchStarted = function(evt) {
             $('#update').text('touchstarted event triggered');
+
         }
 
         sketch.touchMoved = function(evt) {
 
-            pitchCtrl1.update(sketch.touchX, sketch.touchY);
-            pitchCtrl2.update(sketch.touchX, sketch.touchY);
+            var pitchCtrl1Updated = pitchCtrl1.update(sketch.touchX, sketch.touchY);
+            if (pitchCtrl1Updated) {
+                var melodyPitch = pitchCtrl1.getNotation();
+                sb.send('connect', 'string', "melody#" + random_id + "#" + melodyPitch);
+            }
+
+            var pitchCtrl2Updated = pitchCtrl2.update(sketch.touchX, sketch.touchY);
+            
+            if (pitchCtrl2Updated) {
+                var refrainPitch = pitchCtrl2.getNotation();
+                sb.send('connect', 'string', "refrain#" + random_id + "#" + refrainPitch);
+            }
 
         }
 
         sketch.touchEnded = function(evt) {
 
-            var updated = beatCtrl.update(sketch.touchX, sketch.touchY);
+            var beatCtrlUpdated = beatCtrl.update(sketch.touchX, sketch.touchY);
 
-            if (updated) {
+            if (beatCtrlUpdated) {
                 var beatNotation = beatCtrl.getNotation();
 
-                sb.send('beatNotation', 'string', beatNotation);
-
+                sb.send('connect', 'string', "rhythm#" + random_id + "#" + beatNotation);
             }
+
 
         }
     };
