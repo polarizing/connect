@@ -4,6 +4,8 @@ import java.util.List;
 
 import processing.core.PApplet;
 
+
+
 public class NoteManager {
 
 	private PApplet parent;

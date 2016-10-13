@@ -125,74 +125,52 @@ public class GUIManager implements ControlListener{
 	
 	public void numColumns (int theValue) {
 		this.server.grid.setColumnPartitions(theValue);
-		this.server.grid2.setColumnPartitions(theValue);
 
 	}
 	
 	public void numRows (int theValue) {
 		this.server.grid.setRowPartitions(theValue);
-		this.server.grid2.setRowPartitions(theValue);
 
 	}
 	
 	public void marginOffset (int theValue) {
 		this.server.grid.setOffsets(new int[]{theValue, theValue, theValue, theValue});
-		this.server.grid2.setOffsets(new int[]{theValue, theValue, theValue, theValue});
 
 	}
 	
 	public void addClient(int theValue) {
 //		this.server.sb.send( "button_pressed", true ); 
 		
-		float delta = 75;
+		float delta = 150;
+//		int rowPartitions = this.server.grid.getRowPartitions();
+//		float delta = this.server.grid.getRowSize(rowPartitions + 1) + this.server.grid.getRowSize();
 		this.server.gridAnimator.slideIn(this, "top", delta, "emptyCb");
 		this.server.gridAnimator.slideIn(this, "right", delta, "emptyCb");
 		this.server.gridAnimator.slideIn(this, "bottom", delta, "emptyCb");
-		this.server.gridAnimator.slideIn(this, "left", delta, "emptyCb2");
+		this.server.gridAnimator.slideIn(this, "left", delta, "addClientCb");
+	}
+	
+	public void emptyCb() {
 		
 	}
 	
-	public void emptyCb () {
-	}
-	
-	public void emptyCb2 () {
-		
-		float delta = this.server.grid.getColumnSize(this.server.grid.getColumnPartitions() + 1);
-		this.server.gridAnimator.slideIn(this, "right", delta, "addClientCb");
-		
-	}
-
 	public void addClientCb () {
 		parent.println("CALLED!!!!!!");
 		
 		this.server.grid.setOffsets(new int[]{30, 30, 30, 30});
-		this.server.grid.setColumnPartitions(++this.server.numColumns);
-		ArrayList<Container> containers = this.server.grid.getFullColumnContainers();
-		Grid g = new Grid(this.parent, containers.get(containers.size() - 1)).setPartitions(new int[] {0, 4});
-		Client c = new Client(this.parent, this.server.clients.size(), g, 3);
-		this.server.clients.add(c);
-		
-		ArrayList<PVector> pts = g.getMiddlePartitionPoints();
-		for (int i = 0; i < c.getNumTriggers(); i++) {
-			int id = this.server.triggers.size() + i;
-			int triggerColor = this.parent.color(this.parent.random(255), this.parent.random(255), this.parent.random(255));
-			Trigger t = new Trigger(this.parent, id, pts.get(i), triggerColor);
-			this.server.triggers.add(t);
-			c.addTrigger(t);
-		}
-		this.server.numClients++;
-		
-		// set for GUI
-		Controller c1 = cp5.getController("numColumns");
-		Controller c2 = cp5.getController("numClients");
-		int toSet = (int) c1.getValue() + 1;
-		float max = c1.getMax();
-		if (toSet > max) return;
-		else {
-			c1.setValue(toSet);
-			this.server.numClients = toSet;
-		}
-		c2.setValue(toSet);
+		this.server.grid.setRowPartitions(++this.server.numRows);
+				
+//		// set for GUI
+//		Controller c1 = cp5.getController("numColumns");
+//		Controller c2 = cp5.getController("numClients");
+//		int toSet = (int) c1.getValue() + 1;
+//		float max = c1.getMax();
+//		if (toSet > max) return;
+//		else {
+//			c1.setValue(toSet);
+//			this.server.numClients = toSet;
+//		}
+//		c2.setValue(toSet);
 	}
 	
 	
@@ -219,15 +197,15 @@ public class GUIManager implements ControlListener{
 	}
 	
 	public void resize() {
-		menuX = this.parent.width - 200;
-		s1.setPosition(menuX, 50);
-		s2.setPosition(menuX, 75);
-		s3.setPosition(menuX, 100);
-		s4.setPosition(menuX, 125);
-		b1.setPosition(menuX, 150);
-		b2.setPosition(menuX, 175);
-		b3.setPosition(menuX, 200);
-		cp5.setGraphics(this.parent, 0, 0);
+//		menuX = this.parent.width - 200;
+//		s1.setPosition(menuX, 50);
+//		s2.setPosition(menuX, 75);
+//		s3.setPosition(menuX, 100);
+//		s4.setPosition(menuX, 125);
+//		b1.setPosition(menuX, 150);
+//		b2.setPosition(menuX, 175);
+//		b3.setPosition(menuX, 200);
+//		cp5.setGraphics(this.parent, 0, 0);
 	}
 	
 	
