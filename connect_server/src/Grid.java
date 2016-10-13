@@ -2,6 +2,11 @@ import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PVector;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Stream;
+
+import org.apache.commons.lang3.ArrayUtils;
 
 /**
  * A grid helper for Processing applications. Divide any rectangle
@@ -16,8 +21,8 @@ import java.util.ArrayList;
 public class Grid {
 	
 	private PApplet parent;
-	private GridContainer container;
-	private GridContainer marginContainer;
+	private Container gridContainer;
+	private Container marginContainer;
 //	private PVector center;
 	private float topOffset;
 	private float rightOffset;
@@ -25,19 +30,32 @@ public class Grid {
 	private float leftOffset;
 	private int rowPartition;
 	private int columnPartition;
+	
+	// Below are all set in initialization function.
 	private float columnSize;
 	private float rowSize;
 	private float[] columnIntervals;
 	private float[] rowIntervals;
-
+	
+	// Tethering
+	private List<Column> tetheredColumns = new ArrayList<Column>();
+	private List<Row> tetheredRows = new ArrayList<Row>();
+	private List<Tile> tetheredTiles = new ArrayList<Tile>();
+	
 	/**
-	 * 
-	 * @param p
-	 * @param grid
+	 * Constructor function for a new Grid object.
+	 * This grid can take in a general Container object to
+	 * construct a grid with default margins and partitions set to 0.
+	 * This grid does not have columns, rows, or margins, it is no
+	 * different than a container for storing the vector points 
+	 * of the grid.
+	 * @param p processing drawing applet
+	 * @param grid GridContainer
 	 */
-	public Grid(PApplet p, GridContainer grid) {
+	
+	public Grid(PApplet p, Container grid) {
 		this.parent = p;
-		this.container = grid;
+		this.gridContainer = grid;
 		this.marginContainer = grid;
 		this.topOffset = this.rightOffset = this.bottomOffset = this.leftOffset = 0;
 		this.rowPartition = this.columnPartition = 0;
@@ -45,7 +63,12 @@ public class Grid {
 	}
 	
 	/**
-	 * 
+	 * Constructor function for a new Grid object.
+	 * This grid can take a set of parameter vector points <x1, y1, x2, y2>  
+	 * to construct a grid with default margins and partitions set to 0.
+	 * This grid does not have columns, rows, or margins, it is no
+	 * different than a container for storing the vector points 
+	 * of the grid.
 	 * @param p
 	 * @param x1
 	 * @param y1
@@ -54,12 +77,9 @@ public class Grid {
 	 */
 	
 	public Grid (PApplet p, int x1, int y1, int x2, int y2) {
-		
 		this.parent = p;
-//		this.server = (ConnectServer) p;
-		this.container = new GridContainer(x1, y1, x2, y2);
-		this.marginContainer = new GridContainer(x1, y1, x2, y2);
-//		this.center = new PVector(this.width / 2, this.height / 2);
+		this.gridContainer = new Container(x1, y1, x2, y2);
+		this.marginContainer = new Container(x1, y1, x2, y2);
 		this.topOffset = this.rightOffset = this.bottomOffset = this.leftOffset = 0;
 		this.rowPartition = this.columnPartition = 0;
 		this.init();
@@ -73,7 +93,7 @@ public class Grid {
 	 */
 	private void init() {
 		if (this.columnPartition == 0) {
-			this.columnSize = this.container.width;
+			this.columnSize = this.gridContainer.width;
 			this.columnIntervals = new float[0];
 		} else {
 			this.columnSize = this.getColumnSize();
@@ -81,15 +101,40 @@ public class Grid {
 		}
 		
 		if (this.rowPartition == 0) {
-			this.rowSize = this.container.height;
+			this.rowSize = this.gridContainer.height;
 			this.rowIntervals = new float[0];
+
 		} else {
 			this.rowSize = this.getRowSize();
 			this.rowIntervals = this.setRowIntervals();
 		}
 		
+		// Resize Columns and Rows
+		
+		
 		// Update margin bounding box.
-		this.setMarginBoundingBox();
+		this.setMarginBoundingBox();	
+	}
+	
+	
+	/**
+	 * Called when grid size is changed or setGrid() is called.
+	 */
+	private void resize() {
+
+			this.columnSize = this.getColumnSize();
+			this.columnIntervals = this.setColumnIntervals();
+			this.resizeTetheredColumns();
+		
+			this.rowSize = this.getRowSize();
+			this.rowIntervals = this.setRowIntervals();
+			this.resizeTetheredRows();
+			
+			
+			// add tile methods here
+			this.resizeTetheredTiles();
+			
+			this.setMarginBoundingBox();
 	}
 	
 	/**
@@ -100,7 +145,7 @@ public class Grid {
 	 */
 	public float getColumnSize () {
 		float leftRightOffset = this.leftOffset + this.rightOffset;
-		return (float)(this.container.width - leftRightOffset) / this.columnPartition;
+		return (float)(this.gridContainer.width - leftRightOffset) / this.columnPartition;
 	}
 	
 	/**
@@ -110,7 +155,7 @@ public class Grid {
 	 */
 	public float getColumnSize (int numPartition) {
 		float leftRightOffset = this.leftOffset + this.rightOffset;
-		return (float)(this.container.width - leftRightOffset) / numPartition;
+		return (float)(this.gridContainer.width - leftRightOffset) / numPartition;
 	}
 	
 	/**
@@ -121,7 +166,7 @@ public class Grid {
 	 */
 	public float getRowSize () {
 		float topBottomOffset = this.topOffset + this.bottomOffset;
-		return (float)(this.container.height - topBottomOffset) / this.rowPartition;
+		return (float)(this.gridContainer.height - topBottomOffset) / this.rowPartition;
 	}
 	
 	/**
@@ -131,7 +176,7 @@ public class Grid {
 	 */
 	public float getRowSize (int numPartition) {
 		float leftRightOffset = this.leftOffset + this.rightOffset;
-		return (float)(this.container.width - leftRightOffset) / numPartition;
+		return (float)(this.gridContainer.width - leftRightOffset) / numPartition;
 	}
 	
 	/**
@@ -146,11 +191,11 @@ public class Grid {
 		float[] intervals = new float[this.columnPartition + 1];
 		for (int i = 0; i < intervals.length; i++) {
 			if (i == 0) {
-				intervals[i] = this.container.x1;
+				intervals[i] = this.gridContainer.x1;
 			} else if (i == intervals.length - 1) {
-				intervals[i] = this.container.x2;
+				intervals[i] = this.gridContainer.x2;
 			} else {
-				intervals[i] = this.columnSize * i + this.leftOffset + this.container.x1;
+				intervals[i] = this.columnSize * i + this.leftOffset + this.gridContainer.x1;
 			}
 		}
 		return intervals;
@@ -160,43 +205,6 @@ public class Grid {
 		return this.columnIntervals;
 	}
 	
-	/**
-	 * Returns a list of column containers (inside margin).
-	 * @return
-	 */
-	public ArrayList<GridContainer> getColumnContainers() {
-		ArrayList<GridContainer> containers = new ArrayList<GridContainer>();
-		
-		ArrayList<PVector> topPoints = this.getTopPartitionPointsWithMargin();
-		ArrayList<PVector> bottomPoints = this.getBottomPartitionPointsWithMargin();
-		
-		for (int i = 0; i < topPoints.size() - 1; i++) {
-			PVector topPoint = topPoints.get(i);
-			PVector bottomPoint = bottomPoints.get(i+1);
-			GridContainer c = new GridContainer(topPoint, bottomPoint);
-			containers.add(c);
-		}
-		return containers;
-	}
-	
-	/**
-	 * Returns a list of column containers stretching the full canvas height.
-	 * @return
-	 */
-	public ArrayList<GridContainer> getFullColumnContainers() {
-		ArrayList<GridContainer> containers = new ArrayList<GridContainer>();
-		ArrayList<PVector> topPoints = this.getTopOuterPartitionPointsWithMargin();
-		ArrayList<PVector> bottomPoints = this.getBottomOuterPartitionPointsWithMargin();
-		
-		for (int i = 0; i < topPoints.size() - 1; i++) {
-			PVector topPoint = topPoints.get(i);
-			PVector bottomPoint = bottomPoints.get(i+1);
-			GridContainer c = new GridContainer(topPoint, bottomPoint);
-			containers.add(c);
-		}
-		return containers;
-	}
-
 	/**
 	 * Creates an array of interval points. Intervals are always one more 
 	 * than the number of partitions. If there are two partitions, 
@@ -209,11 +217,11 @@ public class Grid {
 		float[] intervals = new float[this.rowPartition + 1];
 		for (int i = 0; i < intervals.length; i++) {
 			if (i == 0) {
-				intervals[i] = this.container.y1;
+				intervals[i] = this.gridContainer.y1;
 			} else if (i == intervals.length - 1) {
-				intervals[i] = this.container.y2;
+				intervals[i] = this.gridContainer.y2;
 			} else {
-				intervals[i] = this.rowSize * i + this.topOffset + this.container.y1;
+				intervals[i] = this.rowSize * i + this.topOffset + this.gridContainer.y1;
 			}
 		}
 		return intervals;
@@ -222,18 +230,284 @@ public class Grid {
 	public float[] getRowIntervals() {
 		return this.rowIntervals;
 	}
+	
+	
+	/**
+	 * Gets an new dynamically generated array of Columns in relation
+	 * to the grid's offsets and partitions.
+	 * A column width is calculated by subtracting the grid's left
+	 * and right offsets and dividing by the number of column partitions.
+	 * A column height is calculated by subtracting the grid's top and
+	 * bottom offsets.
+	 * @return array of columns
+	 */	
+	public Column[] getColumns() {
+		int numColumns = this.columnPartition;
+		float columnWidth = this.columnSize;
+		Column[] columns = new Column[numColumns];
+
+		for (int i = 0; i < numColumns; i++) {
+			float columnOffset = i * columnWidth;
+			if (i == 0) columns[i] = new Column(i, this, this.gridContainer.x1 + this.leftOffset, this.gridContainer.y1 + this.topOffset, this.gridContainer.x1 + columnWidth + this.leftOffset, this.gridContainer.y2 - this.bottomOffset);
+			else if (i == numColumns - 1) columns[i] = new Column(i, this, this.gridContainer.x1 + columnOffset + this.leftOffset, this.gridContainer.y1 + this.topOffset, this.gridContainer.x2 - this.rightOffset, this.gridContainer.y2 - this.bottomOffset);
+			else columns[i] = new Column(i, this, this.gridContainer.x1 + columnOffset + this.leftOffset, this.gridContainer.y1 + this.topOffset, this.gridContainer.x1 + columnOffset + columnWidth + this.leftOffset, this.gridContainer.y2 - this.bottomOffset);
+		}
+		return columns;
+	}
+	
+	/**
+	 * Gets a specific Column in relation to the grid's offsets and partitions.
+	 * @param column
+	 * @return
+	 */
+	public Column getColumn(int column) {
+		int numColumns = this.columnPartition;
+		float columnWidth = this.columnSize;
+		float columnOffset = column * columnWidth;
+
+		if (column == 0) return new Column(column, this, this.gridContainer.x1 + this.leftOffset, this.gridContainer.y1 + this.topOffset, this.gridContainer.x1 + columnWidth + this.leftOffset, this.gridContainer.y2 - this.bottomOffset);
+		else if (column == numColumns - 1) return new Column(column, this, this.gridContainer.x1 + columnOffset + this.leftOffset, this.gridContainer.y1 + this.topOffset, this.gridContainer.x2 - this.rightOffset, this.gridContainer.y2 - this.bottomOffset);
+		else return new Column(column, this, this.gridContainer.x1 + columnOffset + this.leftOffset, this.gridContainer.y1 + this.topOffset, this.gridContainer.x1 + columnOffset + columnWidth + this.leftOffset, this.gridContainer.y2 - this.bottomOffset);
+	}
+	
+	/**
+	 * Removes a column from the column tether store.
+	 * @param c
+	 */
+	public void untetherColumn(Column c) {
+		this.tetheredColumns.remove(c);
+	}
+	
+	/**
+	 * Adds a column to the column tether store.
+	 * @param c
+	 */
+	public void tetherColumn(Column c) {
+		this.tetheredColumns.add(c);
+	}
+	
+	/**
+	 * Gets all tethered columns.
+	 * @return
+	 */
+	public List<Column> getTetheredColumns() {
+		return this.tetheredColumns;
+	}
+	
+	/**
+	 * Resizes all tethered columns. Called when grid's resize() function is called.
+	 */
+	private void resizeTetheredColumns() {
+		for (Column c: this.tetheredColumns) {
+			int column = c.getId();
+			int numColumns = this.columnPartition;
+			float columnWidth = this.columnSize;
+			float columnOffset = column * columnWidth;
+			
+			if (column == 0) c.resize(this.gridContainer.x1 + this.leftOffset, this.gridContainer.y1 + this.topOffset, this.gridContainer.x1 + columnWidth + this.leftOffset, this.gridContainer.y2 - this.bottomOffset);
+			else if (column == numColumns - 1) c.resize(this.gridContainer.x1 + columnOffset + this.leftOffset, this.gridContainer.y1 + this.topOffset, this.gridContainer.x2 - this.rightOffset, this.gridContainer.y2 - this.bottomOffset);
+			else c.resize(this.gridContainer.x1 + columnOffset + this.leftOffset, this.gridContainer.y1 + this.topOffset, this.gridContainer.x1 + columnOffset + columnWidth + this.leftOffset, this.gridContainer.y2 - this.bottomOffset);
+		}
+	}
+	
+	
+	/**
+	 * Gets an new dynamically generated array of Rows in relation
+	 * to the grid's offsets and partitions.
+	 * A row width is calculated by subtracting the grid's left
+	 * and right offsets.
+	 * A row height is calculated by subtracting the grid's top and
+	 * bottom offsets and dividing by the number of row partitions.
+	 * @return array of columns
+	 */	
+	public Row[] getRows() {
+		int numRows = this.rowPartition;
+		float rowHeight = this.rowSize;
+		Row[] rows = new Row[numRows];
+
+		for (int i = 0; i < numRows; i++) {
+			float rowOffset = i * rowHeight;
+			if (i == 0) rows[i] = new Row(i, this, this.gridContainer.x1 + this.leftOffset, this.gridContainer.y1 + this.topOffset, this.gridContainer.x2 - this.rightOffset, this.gridContainer.y1 + this.topOffset + rowHeight);
+			else if (i == numRows - 1) rows[i] = new Row(i, this, this.gridContainer.x1 + this.leftOffset, this.gridContainer.y1 + rowOffset + this.topOffset, this.gridContainer.x2 - this.rightOffset, this.gridContainer.y2 - this.bottomOffset);
+			else rows[i] = new Row(i, this, this.gridContainer.x1 + this.leftOffset, this.gridContainer.y1 + rowOffset + this.topOffset, this.gridContainer.x2 - this.rightOffset, this.gridContainer.y1 + rowOffset + rowHeight + this.topOffset );
+		}
+		return rows;
+	}
+	
+	/**
+	 * Gets a specific Column in relation to the grid's offsets and partitions.
+	 * @param column
+	 * @return
+	 */
+	public Row getRow(int row) {
+		int numRows = this.rowPartition;
+		float rowHeight = this.rowSize;
+		
+			float rowOffset = row * rowHeight;
+			if (row == 0) return new Row(row, this, this.gridContainer.x1 + this.leftOffset, this.gridContainer.y1 + this.topOffset, this.gridContainer.x2 - this.rightOffset, this.gridContainer.y1 + this.topOffset + rowHeight);
+			else if (row == numRows - 1) return new Row(row, this, this.gridContainer.x1 + this.leftOffset, this.gridContainer.y1 + rowOffset + this.topOffset, this.gridContainer.x2 - this.rightOffset, this.gridContainer.y2 - this.bottomOffset);
+			else return new Row(row, this, this.gridContainer.x1 + this.leftOffset, this.gridContainer.y1 + rowOffset + this.topOffset, this.gridContainer.x2 - this.rightOffset, this.gridContainer.y1 + rowOffset + rowHeight + this.topOffset );
+	}
+	
+	/**
+	 * Removes a row from the row tether store.
+	 * @param c
+	 */
+	public void untetherRow(Row r) {
+		this.tetheredRows.remove(r);
+	}
+
+	/**
+	 * Adds a row to the row tether store.
+	 * @param c
+	 */
+	public void tetherRow(Row r) {
+		this.tetheredRows.add(r);
+	}
+	
+	/**
+	 * Gets all tethered row.
+	 * @return
+	 */
+	public List<Row> getTetheredRows() {
+		return this.tetheredRows;
+	}
+	
+	/**
+	 * Resizes all tethered rows. Called when grid's resize() function is called.
+	 */
+	private void resizeTetheredRows() {
+		for (Row r: this.tetheredRows) {
+			int row = r.getId();
+			int numRows = this.rowPartition;
+			float rowHeight = this.rowSize;
+				float rowOffset = row * rowHeight;
+				if (row == 0) r.resize(this.gridContainer.x1 + this.leftOffset, this.gridContainer.y1 + this.topOffset, this.gridContainer.x2 - this.rightOffset, this.gridContainer.y1 + this.topOffset + rowHeight);
+				else if (row == numRows - 1) r.resize(this.gridContainer.x1 + this.leftOffset, this.gridContainer.y1 + rowOffset + this.topOffset, this.gridContainer.x2 - this.rightOffset, this.gridContainer.y2 - this.bottomOffset);
+				else r.resize(this.gridContainer.x1 + this.leftOffset, this.gridContainer.y1 + rowOffset + this.topOffset, this.gridContainer.x2 - this.rightOffset, this.gridContainer.y1 + rowOffset + rowHeight + this.topOffset );
+		}
+	}
+	
+	/**
+	 * Gets an new dynamically generated array of Tiles in relation
+	 * to the grid's offsets and partitions.
+	 * A tile width is calculated by subtracting the grid's left
+	 * and right offsets and dividing by the number of column partitions.
+	 * A tile height is calculated by subtracting the grid's top and
+	 * bottom offsets and dividing by the number of row partitions.
+	 * @return array of tiles
+	 */	
+	public Tile[] getTiles() {
+		
+		Row[] rows = this.getRows();
+		
+		Tile[] tiles = new Tile[0];
+		for (Row r : rows) {
+			Tile[] currentRowTile = r.getTiles();
+			tiles = (Tile[])ArrayUtils.addAll(tiles, currentRowTile);
+		}
+		
+		return tiles;
+	}
+	
+	/**
+	 * Gets a specific Tile in relation to the grid's offsets and partitions.
+	 * @param tile
+	 * @return
+	 */
+	public Tile getTile(int tile) {
+		int rowId = tile / this.getColumnPartitions();
+		int columnId = tile - (rowId * this.getColumnPartitions());
+
+		Row r = this.getRow(rowId);
+		return r.getTile(columnId);
+		
+	}
+	
+	
+	/**
+	 * Removes a tile from the tile tether store.
+	 * @param c
+	 */
+	public void untetherTile(Tile t) {
+		this.tetheredTiles.remove(t);
+	}
+
+	/**
+	 * Adds a tile to the tile tether store.
+	 * @param c
+	 */
+	public void tetherTile(Tile t) {
+		this.tetheredTiles.add(t);
+	}
+	
+	/**
+	 * Gets all tethered tiles.
+	 * @return
+	 */
+	public List<Tile> getTetheredTiles() {
+		return this.tetheredTiles;
+	}
+	
+	/**
+	 * Resizes all tethered tiles. Called when grid's resize() function is called.
+	 */
+	private void resizeTetheredTiles() {
+		for (Tile t: this.tetheredTiles) {
+			// temp get resized tile
+			Tile resizedTile = this.getTile(t.id);
+			t.resize(resizedTile.x1, resizedTile.y1, resizedTile.x2, resizedTile.y2);
+		}
+	}
+	
+	/**
+	 * Returns a list of column containers (inside margin).
+	 * @return
+	 */
+	public ArrayList<Container> getColumnContainers() {
+		ArrayList<Container> containers = new ArrayList<Container>();
+		
+		ArrayList<PVector> topPoints = this.getTopPartitionPointsWithMargin();
+		ArrayList<PVector> bottomPoints = this.getBottomPartitionPointsWithMargin();
+		
+		for (int i = 0; i < topPoints.size() - 1; i++) {
+			PVector topPoint = topPoints.get(i);
+			PVector bottomPoint = bottomPoints.get(i+1);
+			Container c = new Container(topPoint, bottomPoint);
+			containers.add(c);
+		}
+		return containers;
+	}
+	
+	/**
+	 * Returns a list of column containers stretching the full canvas height.
+	 * @return
+	 */
+	public ArrayList<Container> getFullColumnContainers() {
+		ArrayList<Container> containers = new ArrayList<Container>();
+		ArrayList<PVector> topPoints = this.getTopOuterPartitionPointsWithMargin();
+		ArrayList<PVector> bottomPoints = this.getBottomOuterPartitionPointsWithMargin();
+		
+		for (int i = 0; i < topPoints.size() - 1; i++) {
+			PVector topPoint = topPoints.get(i);
+			PVector bottomPoint = bottomPoints.get(i+1);
+			Container c = new Container(topPoint, bottomPoint);
+			containers.add(c);
+		}
+		return containers;
+	}
 
 	/**
 	 * Sets bounding box for margin. Called whenever there are changes made to offsets.
 	 */
 	private void setMarginBoundingBox() {
-		this.marginContainer.x1 = this.container.x1 + this.leftOffset;
-		this.marginContainer.x2 = this.container.x2 - this.rightOffset;
-		this.marginContainer.y1 = this.container.y1 + this.topOffset;
-		this.marginContainer.y2 = this.container.y2 - this.bottomOffset;
+		this.marginContainer.x1 = this.gridContainer.x1 + this.leftOffset;
+		this.marginContainer.x2 = this.gridContainer.x2 - this.rightOffset;
+		this.marginContainer.y1 = this.gridContainer.y1 + this.topOffset;
+		this.marginContainer.y2 = this.gridContainer.y2 - this.bottomOffset;
 	}
 	
-	public GridContainer getMarginBox() {
+	public Container getMarginBox() {
 		return marginContainer;
 	}
 
@@ -428,11 +702,11 @@ public class Grid {
 	}
 	
 	public float getMiddleY() {
-		return this.container.height / 2;
+		return this.gridContainer.height / 2;
 	}
 	
 	public float getMiddleX() {
-		return this.container.width / 2;
+		return this.gridContainer.width / 2;
 	}
 	
 	public PVector getMidpoint() {
@@ -444,8 +718,8 @@ public class Grid {
 	 * Get all grid containers at an index position within but not including the margin boundaries.
 	 * @return
 	 */
-	public ArrayList<GridContainer> getContainers() {
-		ArrayList<GridContainer> containers = new ArrayList<GridContainer>();
+	public ArrayList<Container> getContainers() {
+		ArrayList<Container> containers = new ArrayList<Container>();
 		ArrayList<PVector> partitionPoints = this.getPartitionPointsWithMargin();
 		int part = this.getColumnPartitions();
 		for (int i = 0; i < partitionPoints.size(); i++) {
@@ -453,7 +727,7 @@ public class Grid {
 			if ( (i + 1) % part == 0 || i >= partitionPoints.size() - part) {
 				continue;
 			} else {
-				containers.add(new GridContainer(partitionPoints.get(i), partitionPoints.get(i + part - 1)));
+				containers.add(new Container(partitionPoints.get(i), partitionPoints.get(i + part - 1)));
 			}
 		}
 
@@ -500,20 +774,21 @@ public class Grid {
 		// of partitions. If there are three partitions, there are two
 		// gridlines.
 		this.parent.stroke(255, 255, 255);
+		this.parent.strokeWeight((float) 0.5);
 		for (float interval : this.columnIntervals) {
-			this.parent.line(interval, container.y1, interval, container.y2);
+			this.parent.line(interval, gridContainer.y1, interval, gridContainer.y2);
 		}
 		
 		for (float interval : this.rowIntervals) {
-			this.parent.line(container.x1, interval, container.x2, interval);
+			this.parent.line(gridContainer.x1, interval, gridContainer.x2, interval);
 		}
 		
 		// Draw margin offsets
 		this.parent.stroke(this.parent.color(255, 0, 0));
-		this.parent.line(container.x1, container.y1 + this.topOffset, container.x2, container.y1 + this.topOffset);
-		this.parent.line(container.x1 + this.leftOffset, container.y1, container.x1 + this.leftOffset, container.y2);
-		this.parent.line(container.x1, container.y2 - this.bottomOffset, container.x2, container.y2 - this.bottomOffset);
-		this.parent.line(container.x2 - this.rightOffset, container.y1, container.x2 - this.rightOffset, container.y2);
+		this.parent.line(gridContainer.x1, gridContainer.y1 + this.topOffset, gridContainer.x2, gridContainer.y1 + this.topOffset);
+		this.parent.line(gridContainer.x1 + this.leftOffset, gridContainer.y1, gridContainer.x1 + this.leftOffset, gridContainer.y2);
+		this.parent.line(gridContainer.x1, gridContainer.y2 - this.bottomOffset, gridContainer.x2, gridContainer.y2 - this.bottomOffset);
+		this.parent.line(gridContainer.x2 - this.rightOffset, gridContainer.y1, gridContainer.x2 - this.rightOffset, gridContainer.y2);
 
 		this.parent.stroke(0, 0, 0);
 	}
@@ -626,19 +901,19 @@ public class Grid {
 	 * @return
 	 */
 	public Grid setGrid(int x1, int y1, int x2, int y2) {
-		this.container = new GridContainer(x1, y1, x2, y2);
-		this.init();
+		this.gridContainer = new Container(x1, y1, x2, y2);
+		this.resize();
 		return this;
 	}
 	
-	public Grid setGrid(GridContainer box) {
-		this.container = box;
+	public Grid setGrid(Container box) {
+		this.gridContainer = box;
 		this.init();
 		return this;
 	}
 
-	public GridContainer getContainer() {
-		return container;
+	public Container getContainer() {
+		return gridContainer;
 	}
 
 }

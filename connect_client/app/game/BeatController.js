@@ -1,42 +1,127 @@
-define(['config/Colors', 'config/Config', 'game/BeatTile'], function(Colors, Config, BeatTile) {
+define(['config/Colors', 'config/Config', 'game/BeatTile', 'sockets/sb'], function(Colors, Config, BeatTile, sb) {
 
     var tileMargin = Config.pitchTileMargin;
 
-    function BeatController(container, x1, y1, x2, y2) {
-        this.container = container;
-        this.x1 = x1;
-        this.y1 = y1;
-        this.x2 = x2;
-        this.y2 = y2;
-        this.width = x2 - x1;
-        this.height = y2 - y1;
-        // this.tiles = this.createPitchTiles(this.column)
+    function BeatController(grid) {
+        this.grid = grid;
+        this.container = this.grid.getGrid(); // grid container
+        this.x1 = this.container.x1;
+        this.y1 = this.container.y1;
+        this.x2 = this.container.x2;
+        this.y2 = this.container.y2;
+        this.width = this.x2 - this.x1;
+        this.height = this.y2 - this.y1;
+        this.tiles = this.createBeatTiles(this.grid);
+        this.beats = this.getNumBeats(this.grid);
+        this.activeTiles = [];
+        this.notation = "";
     }
 
-    // BeatController.prototype.createPitchTiles = function(column) {
-    //     return column.getTiles().map(function(tile, tileIdx) {
-    //         return new PitchTile(tileIdx, tile.x1, tile.y1, tile.x2, tile.y2, false);
-    //     })
-    // }
+    BeatController.prototype.createBeatTiles = function(grid) {
+        return grid.getColumns().map(function(column, columnIdx) {
+            return column.getTiles().map(function(tile, tileIdx) {
+                return new BeatTile(columnIdx, tileIdx, tile.x1, tile.y1, tile.x2, tile.y2, false);
+            })
+        }).reduce(function(a, b) {
+            return a.concat(b);
+        });
+    }
 
-    // BeatController.prototype.resizePitchTiles = function(column) {
-    //     console.log('hi')
-    //     var self = this;
-    //     column.getTiles().map(function(tile, tileIdx) {
-    //         self.tiles[tileIdx].updatePosition(tile.x1, tile.y1, tile.x2, tile.y2);
-    //     })
-    // }
+    BeatController.prototype.getNumBeats = function(grid) {
+        return grid.getColumns().length;
+    }
 
-    BeatController.prototype.resize = function(column, x1, y1, x2, y2) {
-        this.x1 = x1;
-        this.y1 = y1;
-        this.x2 = x2;
-        this.y2 = y2;
-        this.width = x2 - x1;
-        this.height = y2 - y1;
+    BeatController.prototype.collides = function(rect, x, y) {
+        var isCollision = false;
+        if (rect.x2 >= x && rect.x1 <= x && rect.y2 >= y && rect.y1 <= y) {
+            isCollision = true;
+        }
 
-        this.column = column;
-        // this.resizePitchTiles(this.column)
+        return isCollision;
+    }
+
+    BeatController.prototype.update = function(touchX, touchY) {
+
+        // return if touch is not even in controller container
+        if (!this.collides(this.container, touchX, touchY)) return;
+        var self = this;
+        // otherwise check for collision with a beat tile
+        this.tiles.forEach(function(tile) {
+            if (self.collides(tile, touchX, touchY)) {
+
+                var tileColumnIndex = tile.getColumnIndex();
+                var activeTile = self.activeTiles[tileColumnIndex];
+
+                if (!activeTile) {
+                    tile.setActive();
+                    self.activeTiles[tileColumnIndex] = tile;
+                } else {
+                    if (activeTile.getColumnIndex() == tile.columnIdx && activeTile.getTileIndex() == tile.tileIdx) {
+                        tile.setInactive();
+                        self.activeTiles[tileColumnIndex] = undefined;
+                    } else {
+                        activeTile.setInactive();
+                        tile.setActive();
+                        self.activeTiles[tileColumnIndex] = tile;
+                    }
+                }
+                // update beat notation to string
+                self.updateNotation();
+            }
+        });
+
+        return true;
+    }
+
+    BeatController.prototype.updateNotation = function() {
+        var beatString = "";
+
+        for (var i = 0; i < this.beats; i++) {
+            var tile = this.activeTiles[i];
+            if (tile) {
+                if (tile.isActive) {
+                    beatString += tile.getTileIndex();
+                } else {
+                    beatString += '-'
+                }
+            }
+            else {
+                beatString += '-';
+            }
+        }
+
+        this.notation = beatString;
+        return this.notation;
+    }
+
+    BeatController.prototype.getNotation = function () {
+        return this.notation;
+    }
+
+    BeatController.prototype.resizeBeatTiles = function(grid) {
+        var currTileIndex = 0;
+        var self = this;
+        grid.getColumns().forEach(function(column, columnIdx) {
+            column.getTiles().forEach(function(tile, tileIdx) {
+                self.tiles[currTileIndex].updatePosition(tile.x1, tile.y1, tile.x2, tile.y2);
+                currTileIndex++;
+            })
+        })
+    }
+
+    BeatController.prototype.resize = function(grid) {
+        // resize container
+        this.grid = grid;
+        this.container = this.grid.getGrid(); // grid container
+        this.x1 = this.container.x1;
+        this.y1 = this.container.y1;
+        this.x2 = this.container.x2;
+        this.y2 = this.container.y2;
+        this.width = this.x2 - this.x1;
+        this.height = this.y2 - this.y1;
+
+        // resize beat tiles
+        this.resizeBeatTiles(grid);
     }
 
     BeatController.prototype.drawContainerOutline = function(sketch) {
@@ -46,35 +131,43 @@ define(['config/Colors', 'config/Config', 'game/BeatTile'], function(Colors, Con
         sketch.rect(this.x1, this.y1, this.width, this.height);
 
         sketch.stroke('rgb(0, 0, 0)')
-        // sketch.filter(sketch.BLUR, 6);
-        // sketch.stroke(0);
         sketch.line(this.x1, this.y1, this.x1, this.y2);
-        // sketch.fill('rgb(39, 39, 39)');
-        // sketch.stroke('rgb(0, 0, 0)')
-        // sketch.rect(this.x1, this.y1 + 40, this.width, this.height - 40, 0, 0, 3, 3);
-        // sketch.fill('rgb(30, 30, 30)');
-        // sketch.rect(this.x1, this.y1, this.width, 40, 3, 3, 0, 0);
-        // sketch.fill('rgb(201, 133, 72)')
-        // sketch.textAlign(sketch.LEFT, sketch.CENTER);
-        // sketch.textSize(15);
-        // if (this.controllerId == 1) {
-        //     sketch.text('Harmony', (this.x1 + 10), (this.y1 + this.y1 + 40) / 2);
-        // } else if (this.controllerId == 2) {
-        //     sketch.text('Refrain', (this.x1 + 10), (this.y1 + this.y1 + 40) / 2);
-        // }
+
     }
 
-    // BeatController.prototype.drawPitchTiles = function(sketch) {
-    //     this.tiles.forEach(function(tile) {
-    //         tile.draw(sketch);
-    //     })
-    // }
+    BeatController.prototype.midpoint = function(x1, y1, x2, y2) {
+        var xCenter = (x1 + x2) / 2;
+        var yCenter = (y1 + y2) / 2;
+        return {
+            x: xCenter,
+            y: yCenter
+        };
+    }
 
-    BeatController.prototype.draw = function(sketch, activeColumn) {
+    BeatController.prototype.drawTileDots = function(sketch) {
+        var self = this;
+        this.tiles.forEach(function(tile) {
+            // draw dots
+            sketch.fill(Colors.lightGrey);
+            sketch.noStroke();
+            var m = self.midpoint(tile.x1, tile.y1, tile.x2, tile.y2)
+            sketch.ellipse(m.x, m.y, 5, 5);
+        })
+    }
+
+    BeatController.prototype.drawTiles = function(sketch) {
+        this.tiles.forEach(function(tile) {
+            tile.draw(sketch);
+        })
+    }
+
+    BeatController.prototype.draw = function(sketch) {
         // Draw Outline (including top bar / background / border)
         this.drawContainerOutline(sketch);
-        // Draw the Tiles
-        // this.drawPitchTiles(sketch);
+        // Draw the Tile
+        this.drawTiles(sketch);
+        // Draw the Tile Dots
+        this.drawTileDots(sketch);
     };
 
     return BeatController;

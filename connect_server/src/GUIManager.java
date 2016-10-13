@@ -39,18 +39,18 @@ public class GUIManager implements ControlListener{
 //		window = cp5.addControlWindow("Control", 100, 100, 200, 200);
 		
 		// Number of Clients Slider
-		  this.parent.println("here:" + this.server.numClients);
+//		  this.parent.println("here:" + this.server.numClients);
 
-		s1 = this.cp5.addSlider("numClients")
-	     .setPosition(menuX, 50)
-	     .setRange(1, 4) // values can range from big to small as well
-	     .plugTo(this)
-	     ;
-		  this.parent.println("here:" + this.server.numClients);
+//		s1 = this.cp5.addSlider("numClients")
+//	     .setPosition(menuX, 50)
+//	     .setRange(1, 4) // values can range from big to small as well
+//	     .plugTo(this)
+//	     ;
+//		  this.parent.println("here:" + this.server.numClients);
 
 		s2 = this.cp5.addSlider("numColumns")
 		.setPosition(menuX, 75)
-	     .setRange(1, 4) // values can range from big to small as well
+	     .setRange(1, 50) // values can range from big to small as well
 	     .plugTo(this)
 	     ;
 		  this.parent.println("here:" + this.server.numColumns);
@@ -58,8 +58,7 @@ public class GUIManager implements ControlListener{
 		s3 = this.cp5.addSlider("numRows")
 		.setPosition(menuX, 100)
 	     .setWidth(100)
-	     .setRange(1, 24) // values can range from big to small as well
-	     .setNumberOfTickMarks(12)
+	     .setRange(1, 50) // values can range from big to small as well
 	     .plugTo(this)
 	     ;
 
@@ -86,8 +85,18 @@ public class GUIManager implements ControlListener{
 				.setSize(100, 19)
 				.plugTo(this);
 		
+		this.cp5.setAutoDraw(false);
+		
 		// connects controller to the controller method below.
 		// (controlP5 version 0.5.9 or later)
+	}
+	
+	public void draw () {
+		  this.parent.hint(this.parent.DISABLE_DEPTH_TEST);
+		  this.server.cam.beginHUD();
+		  cp5.draw();
+		  this.server.cam.endHUD();
+		  this.parent.hint(this.parent.ENABLE_DEPTH_TEST);
 	}
 	
 //	public void numColumns(int theValue) {
@@ -116,14 +125,20 @@ public class GUIManager implements ControlListener{
 	
 	public void numColumns (int theValue) {
 		this.server.grid.setColumnPartitions(theValue);
+		this.server.grid2.setColumnPartitions(theValue);
+
 	}
 	
 	public void numRows (int theValue) {
 		this.server.grid.setRowPartitions(theValue);
+		this.server.grid2.setRowPartitions(theValue);
+
 	}
 	
 	public void marginOffset (int theValue) {
 		this.server.grid.setOffsets(new int[]{theValue, theValue, theValue, theValue});
+		this.server.grid2.setOffsets(new int[]{theValue, theValue, theValue, theValue});
+
 	}
 	
 	public void addClient(int theValue) {
@@ -152,7 +167,7 @@ public class GUIManager implements ControlListener{
 		
 		this.server.grid.setOffsets(new int[]{30, 30, 30, 30});
 		this.server.grid.setColumnPartitions(++this.server.numColumns);
-		ArrayList<GridContainer> containers = this.server.grid.getFullColumnContainers();
+		ArrayList<Container> containers = this.server.grid.getFullColumnContainers();
 		Grid g = new Grid(this.parent, containers.get(containers.size() - 1)).setPartitions(new int[] {0, 4});
 		Client c = new Client(this.parent, this.server.clients.size(), g, 3);
 		this.server.clients.add(c);

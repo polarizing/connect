@@ -15,6 +15,13 @@ define(['config/Colors', 'config/Config'], function(Colors, Config) {
 
         this.active = active || false;
     }
+    BeatTile.prototype.getTileIndex = function () {
+        return this.tileIdx;
+    }
+
+    BeatTile.prototype.getColumnIndex = function () {
+        return this.columnIdx;
+    }
 
     BeatTile.prototype.updatePosition = function(x1, y1, x2, y2) {
         this.x1 = x1;
@@ -29,7 +36,7 @@ define(['config/Colors', 'config/Config'], function(Colors, Config) {
 
         var margin = tileMargin;
         var note = Config.notes[this.tileIdx];
-        if (this.columnIdx = activeColumn) sketch.fill(0);
+        if (this.columnIdx == activeColumn) sketch.fill(0);
         else sketch.fill(Colors[note]);
 
         // if (this.active) {

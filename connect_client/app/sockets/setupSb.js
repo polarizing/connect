@@ -24,8 +24,8 @@ define('sockets/setupSb', ['sockets/sb'], function (sb) {
 	    sb.description("This spacebrew client sends and receives boolean messages.");
 
 	    // configure the publication and subscription feeds
-	    sb.addPublish("buttonPress", "boolean", "false");
-	    sb.addSubscribe("toggleBackground", "boolean");
+	    sb.addPublish("beatNotation", "string", "");
+	    // sb.addSubscribe("toggleBackground", "boolean");
 
 	    // override Spacebrew events - this is how you catch events coming from Spacebrew
 	    sb.onBooleanMessage = onBooleanMessage;
@@ -35,11 +35,11 @@ define('sockets/setupSb', ['sockets/sb'], function (sb) {
 	    sb.connect();
 
 	    // listen to the mouse 
-	    var button = document.getElementById("buttonMsg");
-	    button.addEventListener("mouseup", onButtonPress);
-	    button.addEventListener("mousedown", onButtonRelease);
-	    button.addEventListener("touchstart", onButtonPress);
-	    button.addEventListener("touchend", onButtonRelease);
+	    // var button = document.getElementById("buttonMsg");
+	    // button.addEventListener("mouseup", onButtonPress);
+	    // button.addEventListener("mousedown", onButtonRelease);
+	    // button.addEventListener("touchstart", onButtonPress);
+	    // button.addEventListener("touchend", onButtonRelease);
 
 	}
 
@@ -51,8 +51,8 @@ define('sockets/setupSb', ['sockets/sb'], function (sb) {
 	    if (sb.name() === app_name) {
 	        message += "<br>You can customize this app's name in the query string <br>by adding <strong>name=your_app_name</strong>."
 	    }
-	    var nameElement = document.getElementById("name");
-	    nameElement.innerHTML = message;
+	    // var nameElement = document.getElementById("name");
+	    // nameElement.innerHTML = message;
 	}
 
 	/**

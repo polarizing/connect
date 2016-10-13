@@ -72,7 +72,7 @@ public class Client {
 	
 	public void draw () {
 		if (!this.isConnected()) {
-			GridContainer gc = this.grid.getContainer();
+			Container gc = this.grid.getContainer();
 			this.parent.stroke(255, 255, 255);
 			this.parent.fill(255,0,0,63);
 			this.parent.rect(gc.x1, gc.y1, gc.width, gc.height);

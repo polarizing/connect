@@ -22,5 +22,6 @@
 	<classpathentry kind="lib" path="json4processing.jar"/>
 	<classpathentry kind="lib" path="spacebrew.jar"/>
 	<classpathentry kind="lib" path="WebSocket.jar"/>
+	<classpathentry kind="lib" path="commons-lang3-3.4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

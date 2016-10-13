@@ -9,7 +9,7 @@ require(['grid/Grid', 'sketch',  'sockets/setupSb', 'sockets/sb'],function (Grid
 	    event.preventDefault();
 	}
 
-	// window.onload = setupSb(sb);
+	window.onload = setupSb(sb);
 
 
 	// var grid = new Grid();

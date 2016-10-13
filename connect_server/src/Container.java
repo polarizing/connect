@@ -1,6 +1,6 @@
 import processing.core.PVector;
 
-public class GridContainer {
+public class Container {
 	public float x1;
 	public float y1;
 	public float x2;
@@ -8,7 +8,7 @@ public class GridContainer {
 	public float width;
 	public float height;
 	
-	public GridContainer(float x1, float y1, float x2, float y2) {
+	public Container(float x1, float y1, float x2, float y2) {
 		this.x1 = x1;
 		this.y1 = y1;
 		this.x2 = x2;
@@ -17,7 +17,7 @@ public class GridContainer {
 		this.height = y2 - y1;
 	}
 	
-	public GridContainer(PVector p1, PVector p2) {
+	public Container(PVector p1, PVector p2) {
 		this.x1 = p1.x;
 		this.y1 = p1.y;
 		this.x2 = p2.x;

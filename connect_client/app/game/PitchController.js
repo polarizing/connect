@@ -2,15 +2,16 @@ define(['config/Colors', 'config/Config', 'game/PitchTile'], function(Colors, Co
 
     var tileMargin = Config.pitchTileMargin;
 
-    function PitchController(controllerId, column, x1, y1, x2, y2) {
+    function PitchController(controllerId, grid) {
         this.controllerId = controllerId;
-        this.column = column;
-        this.x1 = x1;
-        this.y1 = y1;
-        this.x2 = x2;
-        this.y2 = y2;
-        this.width = x2 - x1;
-        this.height = y2 - y1;
+        this.grid = grid;
+        this.column = this.grid.getColumn(0);
+        this.x1 = this.column.x1;
+        this.y1 = this.column.y1 - 45;
+        this.x2 = this.column.x2;
+        this.y2 = this.column.y2;
+        this.width = this.x2 - this.x1;
+        this.height = this.y2 - this.y1;
         this.tiles = this.createPitchTiles(this.column)
         this.pitchRange = 4;
         this.pitchY = (this.column.y1 + this.column.y2) / 2;
@@ -23,34 +24,40 @@ define(['config/Colors', 'config/Config', 'game/PitchTile'], function(Colors, Co
     }
 
     PitchController.prototype.resizePitchTiles = function(column) {
-        console.log('hi')
         var self = this;
         column.getTiles().map(function(tile, tileIdx) {
             self.tiles[tileIdx].updatePosition(tile.x1, tile.y1, tile.x2, tile.y2);
         })
     }
 
-    PitchController.prototype.resize = function(column, x1, y1, x2, y2) {
-        this.x1 = x1;
-        this.y1 = y1;
-        this.x2 = x2;
-        this.y2 = y2;
-        this.width = x2 - x1;
-        this.height = y2 - y1;
-
-        this.column = column;
-        this.resizePitchTiles(this.column)
+    PitchController.prototype.resizePitchY = function() {
+        this.pitchY = (this.column.y1 + this.column.y2) / 2;
     }
 
-    PitchController.prototype.getTiles = function () {
+    PitchController.prototype.resize = function(grid) {
+        // resize container
+        this.column = this.grid.getColumn(0);
+        this.x1 = this.column.x1;
+        this.y1 = this.column.y1 - 45;
+        this.x2 = this.column.x2;
+        this.y2 = this.column.y2;
+        this.width = this.x2 - this.x1;
+        this.height = this.y2 - this.y1;
+
+        // resize tiles
+        this.resizePitchTiles(this.column)
+        this.resizePitchY();
+    }
+
+    PitchController.prototype.getTiles = function() {
         return this.tiles;
     }
 
-    PitchController.prototype.getPitchContainer = function () {
+    PitchController.prototype.getPitchContainer = function() {
         return this.column;
     }
 
-    PitchController.prototype.updatePitchY = function (yPos) {
+    PitchController.prototype.updatePitchY = function(yPos) {
         this.pitchY = yPos;
     }
 
@@ -94,6 +101,24 @@ define(['config/Colors', 'config/Config', 'game/PitchTile'], function(Colors, Co
         // Draw the Pitch Line
         this.drawPitchLine(sketch);
     };
+
+    PitchController.prototype.collides = function(rect, x, y) {
+        var isCollision = false;
+        if (rect.x2 >= x && rect.x1 <= x && rect.y2 >= y && rect.y1 <= y) {
+            isCollision = true;
+        }
+
+        return isCollision;
+    }
+
+    PitchController.prototype.update = function(touchX, touchY) {
+        // return if touch is not even in controller container
+        if (!this.collides(this.column, touchX, touchY)) return;
+
+        this.updatePitchY(touchY);
+        this.updatePitchY(touchY);
+
+    }
 
     return PitchController;
 });
