@@ -21,8 +21,13 @@ public class ClientManager {
 		return this.clients;
 	}
 	
+	public boolean hasActiveClients () {
+		return this.clients.size() > 0;
+	}
+	
 	public void addClient (String id) {
-		Client c = new Client(this.parent, id);
+		int nextClientId = this.clients.size();
+		Client c = new Client(this.parent, nextClientId, id);
 		this.clients.add(c);
 		c.setStartPing(this.server.millis());
 		c.setEndPing(this.server.millis());
@@ -61,17 +66,6 @@ public class ClientManager {
 		}
 	}
 	
-	public void setClientRefrainPitchInterval (String id, String interval) {
-		for (Client c : this.clients) {
-			String clientId = c.getClientId();
-			if (id.equals(clientId)) {
-				if (c.isConnected()) {
-					c.setRefrainPitchInterval(interval);
-				}
-			}
-		}
-	}
-	
 	public void setClientInstrument (String id, String instrument) {
 		for (Client c : this.clients) {
 			String clientId = c.getClientId();
@@ -89,7 +83,7 @@ public class ClientManager {
 		this.server.sb.send("checkAlive", true);
 		for (Client c : this.clients) {
 			c.setStartPing(this.server.millis());
-			if ( Math.abs(c.getPing()) > 5000) {
+			if ( Math.abs(c.getPing()) > 8000) {
 				parent.println(c.getPing());
 				c.setDisconnected();
 			}

@@ -1,14 +1,13 @@
 import processing.core.PApplet;
+import processing.core.PImage;
 import processing.core.PVector;
 import peasy.*;
 import ddf.minim.*;
 
 import java.util.List;
-
+import java.util.Random;
+import java.util.stream.IntStream;
 import java.util.ArrayList;
-
-// Used to detect frame resize event.
-import java.awt.event.*;
 
 // Sockets
 import spacebrew.*;
@@ -51,10 +50,9 @@ public class ConnectServer extends PApplet{
 	/** Grid Lengths **/
 	public int variableLength;
 	
-	
 	/** Game Controller **/
 	/** move logic later **/
-	public NoteManager noteM;
+	public SampleManager noteM;
 	public boolean[] beats;
 	
 	/** Sound Manager **/
@@ -66,23 +64,20 @@ public class ConnectServer extends PApplet{
 	/** Socket Manager **/
 	public SocketManager socketM;
 	
-	/**
-	 * Debugging
-	 */
-	Column[] columns;
-	Row[] rows;
-	Tile[] tiles;
-	Column c1;
-	Row r1;
-	Tile t1;
+	/** Drawing! **/
+	/** Stars **/
+	public List<Star> stars;
+	public PImage bg;
+	
+    public Random rnd = new Random();
 	
 	/** Constructor to setup the application. */
 	public ConnectServer() {
 		
 		/** Initialize Grid Variables **/
-		this.numColumns = 16;
+		this.numColumns = 4;
 		this.numRows = 16;
-		this.marginOffset = 30;
+		this.marginOffset = 50;
 		
 		this.numClients = 4;
 		this.variableLength = 400;
@@ -96,12 +91,9 @@ public class ConnectServer extends PApplet{
 	 */
 	public void settings() {
 		print ("\nSettings called.\n");
-		size(1200, 900, P3D);
+//		size(1200, 900, P3D);
 		smooth(8);
-
-		// use P2D for OpenGL faster processing (by a lot, especially for lines ...)
-//		smooth(4);
-//		fullScreen(P3D);
+		fullScreen(P3D);
 	}
 
 	/**
@@ -110,9 +102,9 @@ public class ConnectServer extends PApplet{
 	 * and the initial display.
 	 */
 	public void setup() {
-//		
+
 		// Sets window to be resizable.
-		this.surface.setResizable(true);
+//		this.surface.setResizable(true);
 		
 		// Initialize Minim
 		this.minim = new Minim(this);
@@ -121,14 +113,14 @@ public class ConnectServer extends PApplet{
 		this.sb = new Spacebrew(this);
 		
 		// Initialize Managers
-		this.gui = new GUIManager(this);
-		this.noteM = new NoteManager(this);
+		this.noteM = new SampleManager(this);
 		this.soundM = new SoundManager(this);
+		this.gui = new GUIManager(this);
 		this.clientM = new ClientManager(this);
 		this.socketM = new SocketManager(this);
-
+		
 		// Initialize PeasyCam
-		cam = new PeasyCam(this, width / 2, height / 2, 0, 900);
+		cam = new PeasyCam(this, width / 2, height / 2, 0, 2000);
 		cam.setMinimumDistance(.001);
 		cam.setMaximumDistance(50000);
 		
@@ -139,49 +131,95 @@ public class ConnectServer extends PApplet{
 		// Initialize Grid Animator
 		this.gridAnimator = new GridAnimator(this);
 		
-		frameRate(60);
+		// Initialize Stars
+		this.stars = new ArrayList<Star>();
+		  for (int x = 0; x < 100; x++) {
+//				 int[] heightExclusionRange =   IntStream.rangeClosed(0 + height / 6, height).toArray();
+//				 int[] widthExclusionRange =   IntStream.rangeClosed(0 + width / 6, width - width / 6).toArray();
+				 int[] heightExclusionRange = {1, 2};
+				 int[] widthExclusionRange =  {1, 2};
+				 int randomH = getRandomWithExclusion(this.rnd, 0, height, heightExclusionRange);
+				 int randomW = getRandomWithExclusion(this.rnd, 0, width, widthExclusionRange);
+
+				 Star s;
+				 if ((int) random(0, 2) == 0) {
+				     s = new Star(this, new PVector(random(0, width), randomH), 3, (float) 3.0 );					 
+				 } else {
+				     s = new Star(this, new PVector(randomW, random(0, height / 2)), 3, (float) 3.0 );					 
+				 }
+			     s.setColor(0, 0, 255);
+			     s.setStartingPulseInOutFrame( (int) random(0, 1000) );
+			     s.setPulseInOutSpeed(2);
+			     s.setPulseScaleFrom((float) 0.1);
+			     s.setPulseScaleTo((float) 1.0);
+			     stars.add( s );
+			  }
+		  
+		// Load Background
+		 bg = loadImage("assets/bg2.jpg");
+		 bg.resize(width, height);
+		frameRate(120);
 		print ("Loading sounds ...");
-		delay(3000);
+//		delay(6000);
 		print ("Setup finished.\n");
-		
+
+	}
+	
+	public int getRandomWithExclusion(Random rnd, int start, int end, int... exclude) {
+	    int random = start + rnd.nextInt(end - start + 1 - exclude.length);
+	    for (int ex : exclude) {
+	        if (random < ex) {
+	            break;
+	        }
+	        random++;
+	    }
+	    return random;
 	}
 	
 	public void draw() {
 
 		// Clear canvas.
-		  background(0);
+//		  background(this.bg);
+			// Draw Background
+//		background(0, 194, 178);
+		  background(23, 12, 48);
+		  this.cam.beginHUD();
+//		  setGradient(0, height / 2, width, height / 2, color(100, 100, 100), color(21, 30, 26), 1);
+//		  setGradient(0, 0, width, height / 2, color(22, 33, 30), color(22, 33, 30), 1);
 		  
-		  this.soundM.play();
-		  
-		  // 3d z-axis
-//		  Container gc = this.grid.getContainer();
-//		  stroke(255, 255, 255);
-//		  fill(255, 255, 255);
-//		  line(gc.x1, gc.y2, 0, gc.x1, gc.y2, 500);
-		  
-		  
-//	  fill(color(random(255), random(255), random(255)));
-//
-//	  rect(r1.x1, r1.y1, r1.width, r1.height);
-//	  fill(color(random(255), random(255), random(255)));
-////
-//	  rect(t1.x1, t1.y1, t1.width, t1.height);
-//
+		  this.cam.endHUD();
 
-//		  fill(color(random(255), random(255), random(255)));
-//		  rect(c.x1, c.y1, c.width, c.height);  
-//		  
+		  this.cam.beginHUD();
+		  for (int i = 0; i < stars.size(); i++) {
+			    Star s = stars.get(i);
+			    s.display();
+			  }
+		  this.cam.endHUD();
+		  
+		  // Play Sounds
+		  if (this.clientM.hasActiveClients()) {
+			  this.soundM.play();			  
+		  }
+
+		  // Update Clients
+		  List<Client> clients = this.clientM.getClients();
+		  
+		  for (Client c : clients) {
+			  c.draw();
+		  }
+		  
 //			// Resize grid -- move logic to resize callback
 //			// The main grid container is full canvas width and height
 			this.grid.setGrid(0, 0, width, height);
-			this.grid.draw();
-			
+//			this.grid.draw();
 			this.gridAnimator.runAnimations();
 			
+		
+			// Draw GUI
 			this.gui.draw();
 			
 			// GUI RESIZE IS BROKEN
-//		  this.gui.resize();
+			// this.gui.resize();
 
 		// FrameRate indicator (3D)
 		  this.cam.beginHUD();
@@ -190,11 +228,36 @@ public class ConnectServer extends PApplet{
 			text("X: " + mouseX + " Y: " + mouseY, 20, 40);
 		  this.cam.endHUD();
 		  
+		  // Check Clients Still Alive
+
 		  if (frameCount % 120 == 0) {
 			  this.clientM.checkConnections();
 		  }
-		
+		  
 	}
+	
+	public void setGradient(int x, int y, float w, float h, int c1, int c2, int axis ) {
+
+//		  noFill();
+		  
+		  
+		  if (axis == 1) {  // Top to bottom gradient
+		    for (int i = y; i <= y+h; i++) {
+		      float inter = map(i, y, y+h, 0, 1);
+		      int c = lerpColor(c1, c2, inter);
+		      stroke(c);
+		      line(x, i, x+w, i);
+		    }
+		  }  
+		  else if (axis == 2) {  // Left to right gradient
+		    for (int i = x; i <= x+w; i++) {
+		      float inter = map(i, x, x+w, 0, 1);
+		      int c = lerpColor(c1, c2, inter);
+		      stroke(c);
+		      line(i, y, i, y+h);
+		    }
+		  }
+		}
 	
 	public void onBooleanMessage( String name, boolean value ){
 		println("got bool message " + name + " : " + value); 
@@ -221,9 +284,6 @@ public class ConnectServer extends PApplet{
 			}
 			else if (state.equals("melody")) {
 				this.clientM.setClientHarmonyPitchInterval(id, data);
-			}
-			else if (state.equals("refrain")) {
-				this.clientM.setClientRefrainPitchInterval(id, data);
 			}
 			else if (state.equals("instrument")) {
 				this.clientM.setClientInstrument(id, data);

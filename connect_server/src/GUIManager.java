@@ -11,8 +11,8 @@ public class GUIManager implements ControlListener{
 	private ControlP5 cp5;
 	private ControlWindow window;
 	private Slider s1, s2, s3, s4;
-	private Slider n1, n2, n3, n4;
-	private Button b1, b2, b3;
+	private Slider n0, n1, n2, n3, n4;
+	private Button b1, b2, b3, b4, b5, b6;
 	private int menuX;
 	CallbackListener cb;
 	// Really confusing as to why:
@@ -32,8 +32,6 @@ public class GUIManager implements ControlListener{
 		  this.cp5.setColorActive(0xffff0000);
 		  
 		  this.menuX = parent.width - 200;
-		  
-		 
 		
 		// External Control Window Disabled in ControlP5 v2.0 ...
 		// Look into using Java AWT Frame
@@ -41,77 +39,95 @@ public class GUIManager implements ControlListener{
 		
 		// Number of Clients Slider
 //		  this.parent.println("here:" + this.server.numClients);
-
-		n1 = this.cp5.addSlider("noteOneTime")
-	     .setPosition(menuX, 50)
-	     .setRange(0, 4) // values can range from big to small as well
-	     .setValue((float) 0.25)
-	     .setNumberOfTickMarks(17)
-	     .plugTo(this)
-	     ;
-		
-		n2 = this.cp5.addSlider("noteTwoTime")
-			     .setPosition(menuX, 75)
-			     .setRange(0, 4) // values can range from big to small as well
-			     .setValue((float) 0.50)
-			     .setNumberOfTickMarks(17)
-			     .plugTo(this)
-			     ;
-		n3 = this.cp5.addSlider("noteThreeTime")
-			     .setPosition(menuX, 100)
-			     .setRange(0, 4) // values can range from big to small as well
-			     .setValue((float) 0.75)
-			     .setNumberOfTickMarks(17)
-
-			     .plugTo(this)
-			     ;
-		n4 = this.cp5.addSlider("noteFourTime")
-			     .setPosition(menuX, 125)
-			     .setRange(0, 4) // values can range from big to small as well
-			     .setValue((float) 1.0)
-			     .setNumberOfTickMarks(17)
-			     .plugTo(this)
-			     ;
+		  n0 = this.cp5.addSlider("setSpeed")
+				     .setPosition(menuX, 25)
+				     .setRange(0, 4) // values can range from big to small as well
+				     .setNumberOfTickMarks(17)
+				     .plugTo(this)
+				     ;
+		  
+//		n1 = this.cp5.addSlider("noteOneTime")
+//	     .setPosition(menuX, 50)
+//	     .setRange(0, 4) // values can range from big to small as well
+//	     .setValue((float) 0.25)
+//	     .setNumberOfTickMarks(17)
+//	     .plugTo(this)
+//	     ;
+//		
+//		n2 = this.cp5.addSlider("noteTwoTime")
+//			     .setPosition(menuX, 75)
+//			     .setRange(0, 4) // values can range from big to small as well
+//			     .setValue((float) 0.50)
+//			     .setNumberOfTickMarks(17)
+//			     .plugTo(this)
+//			     ;
+//		n3 = this.cp5.addSlider("noteThreeTime")
+//			     .setPosition(menuX, 100)
+//			     .setRange(0, 4) // values can range from big to small as well
+//			     .setValue((float) 0.75)
+//			     .setNumberOfTickMarks(17)
+//
+//			     .plugTo(this)
+//			     ;
+//		n4 = this.cp5.addSlider("noteFourTime")
+//			     .setPosition(menuX, 125)
+//			     .setRange(0, 4) // values can range from big to small as well
+//			     .setValue((float) 1.0)
+//			     .setNumberOfTickMarks(17)
+//			     .plugTo(this)
+//			     ;
 //		  this.parent.println("here:" + this.server.numClients);
 		  
 		  
 
-		s2 = this.cp5.addSlider("numColumns")
-		.setPosition(menuX, 150)
-	     .setRange(1, 50) // values can range from big to small as well
-	     .plugTo(this)
-	     ;
-		  this.parent.println("here:" + this.server.numColumns);
+//		s2 = this.cp5.addSlider("numColumns")
+//		.setPosition(menuX, 150)
+//	     .setRange(1, 50) // values can range from big to small as well
+//	     .plugTo(this)
+//	     ;
+//		  this.parent.println("here:" + this.server.numColumns);
 
-		s3 = this.cp5.addSlider("numRows")
-		.setPosition(menuX, 175)
-	     .setWidth(100)
-	     .setRange(1, 50) // values can range from big to small as well
-	     .plugTo(this)
-	     ;
-
-		s4 = this.cp5.addSlider("marginOffset")
-		.setPosition(menuX, 200)
-		.setWidth(100)
-	     .setRange(0, 150)
-		.plugTo(this);
-		
-		b1 = this.cp5.addButton("addClient")
-		.setPosition(menuX, 175)
-		.setSize(100, 19)
-		.plugTo(this)
-		;
-		
-		b2 = this.cp5.addButton("removeClient")
-		.setPosition(menuX, 200)
-		.setSize(100, 19)
-		.plugTo(this)
-		;
-
-		b3 = this.cp5.addButton("setFast")
-				.setPosition(menuX, 225)
-				.setSize(100, 19)
-				.plugTo(this);
+//		s3 = this.cp5.addSlider("numRows")
+//		.setPosition(menuX, 175)
+//	     .setWidth(100)
+//	     .setRange(1, 50) // values can range from big to small as well
+//	     .plugTo(this)
+//	     ;
+//
+//		s4 = this.cp5.addSlider("marginOffset")
+//		.setPosition(menuX, 200)
+//		.setWidth(100)
+//	     .setRange(0, 150)
+//		.plugTo(this);
+//		
+//		b1 = this.cp5.addButton("addClient")
+//		.setPosition(menuX, 175)
+//		.setSize(100, 19)
+//		.plugTo(this)
+//		;
+//		
+//		b2 = this.cp5.addButton("removeClient")
+//		.setPosition(menuX, 200)
+//		.setSize(100, 19)
+//		.plugTo(this)
+//		;
+//
+//		b3 = this.cp5.addButton("setFast")
+//				.setPosition(menuX, 225)
+//				.setSize(100, 19)
+//				.plugTo(this);
+//		b4 = this.cp5.addButton("setMediumFast")
+//				.setPosition(menuX, 250)
+//				.setSize(100, 19)
+//				.plugTo(this);
+//		b5 = this.cp5.addButton("setModerate")
+//				.setPosition(menuX, 275)
+//				.setSize(100, 19)
+//				.plugTo(this);
+//		b6 = this.cp5.addButton("setSlow")
+//				.setPosition(menuX, 300)
+//				.setSize(100, 19)
+//				.plugTo(this);
 		
 		this.cp5.setAutoDraw(false);
 		
@@ -179,13 +195,14 @@ public class GUIManager implements ControlListener{
 	public void addClient(int theValue) {
 //		this.server.sb.send( "button_pressed", true ); 
 		
-		float delta = 150;
+		this.server.clientM.addClient("hi");
+//		float delta = 150;
 //		int rowPartitions = this.server.grid.getRowPartitions();
 //		float delta = this.server.grid.getRowSize(rowPartitions + 1) + this.server.grid.getRowSize();
-		this.server.gridAnimator.slideIn(this, "top", delta, "emptyCb");
-		this.server.gridAnimator.slideIn(this, "right", delta, "emptyCb");
-		this.server.gridAnimator.slideIn(this, "bottom", delta, "emptyCb");
-		this.server.gridAnimator.slideIn(this, "left", delta, "addClientCb");
+//		this.server.gridAnimator.slideIn(this, "top", delta, "emptyCb");
+//		this.server.gridAnimator.slideIn(this, "right", delta, "emptyCb");
+//		this.server.gridAnimator.slideIn(this, "bottom", delta, "emptyCb");
+//		this.server.gridAnimator.slideIn(this, "left", delta, "addClientCb");
 	}
 	
 	public void emptyCb() {
@@ -226,11 +243,40 @@ public class GUIManager implements ControlListener{
 		c2.setValue(toSet);
 	}
 	
+	public void setSpeed (float theValue) {
+		this.server.soundM.noteAverageSpeed = theValue;
+	}
+	
 	public void setFast(int theValue) {
 		this.server.soundM.noteOneTime = 0.124;
 		this.server.soundM.noteTwoTime = 0.249;
 		this.server.soundM.noteThreeTime = 0.374;
 		this.server.soundM.noteFourTime = 0.499;
+
+//		this.server.gridAnimator.slideIn("right", 30, 2);
+	}
+	
+	public void setMediumFast(int theValue) {
+		this.server.soundM.noteOneTime = 0.250;
+		this.server.soundM.noteTwoTime = 0.500;
+		this.server.soundM.noteThreeTime = 0.750;
+		this.server.soundM.noteFourTime = 1.000;
+
+//		this.server.gridAnimator.slideIn("right", 30, 2);
+	}
+
+	public void setModerate (int theValue) {
+		this.server.soundM.noteOneTime = 0.500;
+		this.server.soundM.noteTwoTime = 1.000;
+		this.server.soundM.noteThreeTime = 1.500;
+		this.server.soundM.noteFourTime = 2.000;
+	}
+	
+	public void setSlow(int theValue) {
+		this.server.soundM.noteOneTime = 1.000;
+		this.server.soundM.noteTwoTime = 2.000;
+		this.server.soundM.noteThreeTime = 3.000;
+		this.server.soundM.noteFourTime = 4.000;
 
 //		this.server.gridAnimator.slideIn("right", 30, 2);
 	}

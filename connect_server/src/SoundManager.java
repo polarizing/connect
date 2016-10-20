@@ -44,6 +44,8 @@ public class SoundManager {
 	boolean noteTwoPlayed = false;
 	boolean noteThreePlayed = false;
 	boolean noteFourPlayed = false;
+	boolean noteReset = false;
+	
 		
 	/**
 	 * Timing
@@ -53,8 +55,7 @@ public class SoundManager {
 	public double noteTwoTime = 0.500;
 	public double noteThreeTime = 0.750;
 	public double noteFourTime = 1.000;
-	
-	
+	public double noteAverageSpeed = 1;
 	
 	/**
 	 * Instrument Objects
@@ -78,6 +79,10 @@ public class SoundManager {
 		bgElapsedTime = 4.01;
 	}
 	
+	public double getElapsedTime() {
+		return this.elapsedTime;
+	}
+	
 	public void initInstruments() {
 		bassSynth = new BassSynth(this.parent);
 		harpsichord = new Harpsichord(this.parent);
@@ -88,13 +93,32 @@ public class SoundManager {
 		this.bgTrack = this.server.minim.loadFile("audios/drums/simplerBeat.mp3");
 	}
 	
-	public void setNoteOneTime(float time) {
-		parent.println("setting time");
-		this.noteOneTime = time;
+	public void playInstrument (String instrument, int pitch) {
+		if (instrument.equals("marimba")) {
+			marimba.playSound(pitch);
+		}
+		else if (instrument.equals("bassSynth")) {
+			bassSynth.playSound(pitch);
+		}
+		else if (instrument.equals("harpsichord")) {
+			harpsichord.playSound(pitch);
+		}
+		else if (instrument.equals("pluckedSynth")) {
+			pluckedSynth.playSound(pitch);
+		}
+		else if (instrument.equals("organ")) {
+			organ.playSound(pitch);
+		}
+		else if (instrument.equals("steelDrum")) {
+			steelDrum.playSound(pitch);
+		}		
 	}
 	
 	public void play() {
 		
+		
+		List<Client> clients = this.server.clientM.getClients();
+
 		if (!trackerInitialized) {
 			this.initTracker();
 			trackerInitialized = true;
@@ -104,178 +128,141 @@ public class SoundManager {
 		elapsedTime = (currTime - prevTime) / 1000.0;
 		bgElapsedTime = (currTime - bgPrevTime) / 1000.0;
 		
-		
-		List<Client> clients = this.server.clientM.getClients();
-		
-		if (elapsedTime >= noteOneTime && !noteOnePlayed) {
+		if (elapsedTime >= (noteAverageSpeed / 4) * 1 - 0.25 && !noteOnePlayed) {
+			parent.println("hi");
+			noteReset = false;
+
 			if (bgElapsedTime > 3.99) {
 				bgPrevTime = currTime;
 				this.bgTrack.rewind();
-				this.bgTrack.setGain(-15);
+				this.bgTrack.setGain(-10);
 				this.bgTrack.play();
 			}
 			
 			for (Client c : clients) {
 				String instrument = c.getInstrument();
 				String rhythm = c.getRhythm();
-				String harmony = c.getHarmonyPitchInterval();
+				String pitchInterval = c.getPitchInterval();
+
+				// if client has no measures
+				// in case clients connect on another 
+				if (!c.getBeatManager().hasMeasures()) {
+					c.getBeatManager().addBeatMeasure();
+				}
+				// always add a new beat measure every beat ...
+				else {
+					c.getBeatManager().addBeatMeasure();
+				}
+				
 
 				// Main Melody
-				if (Character.isDigit(rhythm.charAt(0))) {
-					int rhythmValue = Character.getNumericValue(rhythm.charAt(0));					
-					int harmonyIntervalValue = Character.getNumericValue(harmony.charAt(0));
-
-					if (instrument.equals("marimba")) {
-						marimba.playSound(rhythmValue + harmonyIntervalValue);
-					}
-					else if (instrument.equals("bassSynth")) {
-						bassSynth.playSound(rhythmValue + harmonyIntervalValue);
-					}
-					else if (instrument.equals("harpsichord")) {
-						harpsichord.playSound(rhythmValue + harmonyIntervalValue);
-					}
-					else if (instrument.equals("pluckedSynth")) {
-						pluckedSynth.playSound(rhythmValue + harmonyIntervalValue);
-					}
-					else if (instrument.equals("organ")) {
-						organ.playSound(rhythmValue + harmonyIntervalValue);
-					}
-					else if (instrument.equals("steelDrum")) {
-						steelDrum.playSound(rhythmValue + harmonyIntervalValue);
-					}
+				// Play!
+				BeatMeasure measure = c.getBeatManager().getCurrentMeasure();
+				measure.addBeat(instrument, rhythm.charAt(0), pitchInterval.charAt(0));
+				BeatNote note = measure.getBeatNote(0);
+				
+				// is not a - (empty note -- non specified by user)
+				if (note.hasSound()) {
+					int pitchValue = note.getPitchValue();
+					this.playInstrument(instrument, pitchValue);
 				}
 				
 			}
-					
-//			bassSynth.playSound(7);
-//			marimba.playSound(10);
-//			harpsichord.playSound(0);
-//			pluckedSynth.playSound(0);
 			noteOnePlayed = true;
 		}
 		
-		if (elapsedTime >= noteTwoTime && !noteTwoPlayed) {
-			
-			
-//			
+		if (elapsedTime >= (noteAverageSpeed / 4) * 2 - 0.25 && !noteTwoPlayed) {
+			parent.println("hi2");
+
 			for (Client c : clients) {
 				String instrument = c.getInstrument();
 				String rhythm = c.getRhythm();
-				String harmony = c.getHarmonyPitchInterval();
-
-				if (Character.isDigit(rhythm.charAt(1))) {
-					int rhythmValue = Character.getNumericValue(rhythm.charAt(1)); 
-					int harmonyValue = Character.getNumericValue(harmony.charAt(0)); 
-					if (instrument.equals("marimba")) {
-						marimba.playSound(rhythmValue + harmonyValue);
-					}
-					else if (instrument.equals("bassSynth")) {
-						bassSynth.playSound(rhythmValue + harmonyValue);
-					}
-					else if (instrument.equals("harpsichord")) {
-						harpsichord.playSound(rhythmValue + harmonyValue);
-					}			
-					else if (instrument.equals("pluckedSynth")) {
-						pluckedSynth.playSound(rhythmValue + harmonyValue);
-					}
-					else if (instrument.equals("organ")) {
-						organ.playSound(rhythmValue + harmonyValue);
-					}
-					else if (instrument.equals("steelDrum")) {
-						steelDrum.playSound(rhythmValue + harmonyValue);
-					}
+				String pitchInterval = c.getPitchInterval();
+				
+				if (!c.getBeatManager().hasMeasures()) {
+					c.getBeatManager().addBeatMeasure();
+					BeatMeasure measure = c.getBeatManager().getCurrentMeasure();
+					measure.addBeat(instrument, '-', pitchInterval.charAt(0));
 				}
-			}
-//			harpsichord.playSound(1);
+				
+				BeatMeasure measure = c.getBeatManager().getCurrentMeasure();
+				measure.addBeat(instrument, rhythm.charAt(1), pitchInterval.charAt(0));
+				BeatNote note = measure.getBeatNote(1);
+				
+				if (note.hasSound()) {
+					int pitchValue = note.getPitchValue();
+					this.playInstrument(instrument, pitchValue);
+				}
+
 			noteTwoPlayed = true;
+			}
 		}
 		
-		if (elapsedTime >= noteThreeTime && !noteThreePlayed) {
-			
+		if (elapsedTime >= (noteAverageSpeed / 4) * 3 - 0.25 && !noteThreePlayed) {
+	
 			for (Client c : clients) {
 				String instrument = c.getInstrument();
 				String rhythm = c.getRhythm();
-				String harmony = c.getHarmonyPitchInterval();
-
-				if (Character.isDigit(rhythm.charAt(2))) {
-					int rhythmValue = Character.getNumericValue(rhythm.charAt(2)); 
-					int harmonyValue = Character.getNumericValue(harmony.charAt(0)); 
-					
-					if (instrument.equals("marimba")) {
-						marimba.playSound(rhythmValue + harmonyValue);
-					}
-					else if (instrument.equals("bassSynth")) {
-						bassSynth.playSound(rhythmValue + harmonyValue);
-					}
-					else if (instrument.equals("harpsichord")) {
-						harpsichord.playSound(rhythmValue + harmonyValue);
-					}	
-					else if (instrument.equals("pluckedSynth")) {
-						pluckedSynth.playSound(rhythmValue + harmonyValue);
-					}
-					else if (instrument.equals("organ")) {
-						organ.playSound(rhythmValue + harmonyValue);
-					}
-					else if (instrument.equals("steelDrum")) {
-						steelDrum.playSound(rhythmValue + harmonyValue);
-					}
-
+				String pitchInterval = c.getPitchInterval();
+				
+				if (!c.getBeatManager().hasMeasures()) {
+					c.getBeatManager().addBeatMeasure();
+					BeatMeasure measure = c.getBeatManager().getCurrentMeasure();
+					measure.addBeat(instrument, '-', pitchInterval.charAt(0));
+					measure.addBeat(instrument, '-', pitchInterval.charAt(0));
+				}
+				
+				BeatMeasure measure = c.getBeatManager().getCurrentMeasure();
+				measure.addBeat(instrument, rhythm.charAt(2), pitchInterval.charAt(0));
+				BeatNote note = measure.getBeatNote(2);
+				
+				if (note.hasSound()) {
+					int pitchValue = note.getPitchValue();
+					this.playInstrument(instrument, pitchValue);
 				}
 
-				
 			}
-
-//			marimba.playSound(4);
-//			harpsichord.playSound(3);
-//			pluckedSynth.playSound(4);
 			noteThreePlayed = true;
 		}
 		
-		if (elapsedTime >= noteFourTime && !noteFourPlayed) {
+		if (elapsedTime >= (noteAverageSpeed / 4) * 4 - 0.25 && !noteFourPlayed) {
+
 			for (Client c : clients) {
 				String instrument = c.getInstrument();
 				String rhythm = c.getRhythm();
-				String harmony = c.getHarmonyPitchInterval();
-
-				if (Character.isDigit(rhythm.charAt(3))) {
-					int rhythmValue = Character.getNumericValue(rhythm.charAt(3)); 
-					int harmonyValue = Character.getNumericValue(harmony.charAt(0)); 
-
-					if (instrument.equals("marimba")) {
-						marimba.playSound(rhythmValue + harmonyValue);
-					}
-					else if (instrument.equals("bassSynth")) {
-						bassSynth.playSound(rhythmValue + harmonyValue);
-					}
-					else if (instrument.equals("harpsichord")) {
-						harpsichord.playSound(rhythmValue + harmonyValue);
-					}	
-					else if (instrument.equals("pluckedSynth")) {
-						pluckedSynth.playSound(rhythmValue + harmonyValue);
-					}
-					else if (instrument.equals("organ")) {
-						organ.playSound(rhythmValue + harmonyValue);
-					}
-					else if (instrument.equals("steelDrum")) {
-						steelDrum.playSound(rhythmValue + harmonyValue);
-					}
+				String pitchInterval = c.getPitchInterval();
+				
+				if (!c.getBeatManager().hasMeasures()) {
+					c.getBeatManager().addBeatMeasure();
+					BeatMeasure measure = c.getBeatManager().getCurrentMeasure();
+					measure.addBeat(instrument, '-', pitchInterval.charAt(0));
+					measure.addBeat(instrument, '-', pitchInterval.charAt(0));
+					measure.addBeat(instrument, '-', pitchInterval.charAt(0));
 				}
-	
-			}
-			
-
-//			marimba.playSound(5);
-//			harpsichord.playSound(2);
-//			bassSynth.playSound(0);
-			
+				
+				BeatMeasure measure = c.getBeatManager().getCurrentMeasure();
+				measure.addBeat(instrument, rhythm.charAt(3), pitchInterval.charAt(0));
+				BeatNote note = measure.getBeatNote(3);
+				
+				if (note.hasSound()) {
+					int pitchValue = note.getPitchValue();
+					this.playInstrument(instrument, pitchValue);
+				}
 			
 			noteFourPlayed = true;
-			
-			// Reset time interval.
-			prevTime = currTime;
-			
-			// Reset playback tracker.
-			noteOnePlayed = noteTwoPlayed = noteThreePlayed = noteFourPlayed = false;
+		}
+		}
+		
+		if (elapsedTime >= (noteAverageSpeed / 4) * 4 && !noteReset) {
+			for (Client c : clients) {
+				// Reset time interval.
+				prevTime = currTime;
+				
+				// Reset playback tracker.
+				noteOnePlayed = noteTwoPlayed = noteThreePlayed = noteFourPlayed = false;
+	
+				noteReset = true;
+			}
 		}
 		
 	}

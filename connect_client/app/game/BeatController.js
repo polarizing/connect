@@ -89,6 +89,7 @@ define(['config/Colors', 'config/Config', 'game/BeatTile', 'sockets/sb'], functi
                 beatString += '-';
             }
         }
+        
 
         this.notation = beatString;
         return this.notation;

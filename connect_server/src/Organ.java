@@ -4,14 +4,14 @@ public class Organ {
 
 	private PApplet parent;
 	private ConnectServer server;
-	private NoteManager nm;
+	private SampleManager nm;
 	private String name;
 
 	public Organ(PApplet p) {
 		this.parent = p;
 		this.server = (ConnectServer) p;
 		this.name = "Organ";
-		this.nm = new NoteManager(this.parent);
+		this.nm = new SampleManager(this.parent);
 		this.nm.setLoadDirectory("audios/organ", "mp3");
 		this.nm.loadNotes("a5, g4, e4, d4, c4, a4, g3, e3, d3, c3, a3");
 	}

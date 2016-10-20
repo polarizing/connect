@@ -1,20 +1,19 @@
 import processing.core.PApplet;
 import ddf.minim.*;
 
-public class NoteManager {
+public class SampleManager {
 
 	private PApplet parent;
 	private ConnectServer server;
-	public Note[] notes;
+	public Sample[] samples;
 	public String notesDir;
 	public String notesSoundExt;
 	public String beatNotation;
 	
-	
-	public NoteManager(PApplet p) {
+	public SampleManager(PApplet p) {
 		this.parent = p;
 		this.server = (ConnectServer) p;
-		this.notes = new Note[0];
+		this.samples = new Sample[0];
 		this.beatNotation = "";
 		this.notesDir = "";
 	}
@@ -26,34 +25,25 @@ public class NoteManager {
 	
 	public void loadNotes (String notesString) {
 		String[] notes = notesString.split(", ");
-		this.notes = new Note[notes.length];
+		this.samples = new Sample[notes.length];
 		
 		for (int i = 0; i < notes.length; i++) {
 			String note = notes[i];
 			parent.println(this.notesDir + "/" + note + "." + notesSoundExt);
 			AudioSample noteSound = this.server.minim.loadSample(this.notesDir + "/" + note + "." + notesSoundExt);
-			this.notes[i] = new Note(this.parent, note, noteSound);
+			this.samples[i] = new Sample(this.parent, note, noteSound);
 		}
 	}
 	
 	public void play (int index, float gain) {
-		notes[index].play(gain);
+		samples[index].play(gain);
 	}
 	
 	public void play (int index) {
-		notes[index].play();
+		samples[index].play();
 	}
-//	
-//	public void updateNotation (String notation) {
-//		// if notation is different (some beat changed)
-//		if (!this.beatNotation.equals(notation)) {
-//			this.beatNotation = notation;
-//			
-//		}
-//	}
-	
 	
 	public String toString() {
-		return "A note manager class";
+		return "A sample manager class";
 	}
 }

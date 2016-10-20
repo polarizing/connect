@@ -7,6 +7,7 @@ public class Container {
 	public float y2;
 	public float width;
 	public float height;
+	public PVector center;
 	
 	public Container(float x1, float y1, float x2, float y2) {
 		this.x1 = x1;
@@ -15,6 +16,7 @@ public class Container {
 		this.y2 = y2;
 		this.width = x2 - x1;
 		this.height = y2 - y1;
+		this.center = new PVector( (this.x1 + this.x2) / 2, (this.y1 + this.y2) / 2);
 	}
 	
 	public Container(PVector p1, PVector p2) {
@@ -24,6 +26,7 @@ public class Container {
 		this.y2 = p2.y;
 		this.width = this.x2 - this.x1;
 		this.height = this.y2 - this.y1;
+		this.center = new PVector( (this.x1 + this.x2) / 2, (this.y1 + this.y2) / 2);
 	}
 	
 	public String toString() {

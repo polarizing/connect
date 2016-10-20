@@ -11,6 +11,7 @@ public class Column {
 	public float y2;
 	public float width;
 	public float height;
+	public PVector center;
 	
 	/**
 	 * A column belongs to a grid. It has an id set as it's column number
@@ -33,6 +34,8 @@ public class Column {
 		this.y2 = y2;
 		this.width = x2 - x1;
 		this.height = y2 - y1;
+		this.center = new PVector( (this.x1 + this.x2) / 2, (this.y1 + this.y2) / 2);
+
 	}
 	
 	public int getId() {

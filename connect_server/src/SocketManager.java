@@ -23,11 +23,9 @@ public class SocketManager {
 		// declare your publishers
 		this.server.sb.addPublish("checkAlive", "boolean", "true");
 		// declare your subscribers
-//		this.server.sb.addSubscribe( "rhythm", "string");
 		this.server.sb.addSubscribe("connect", "string");
 		// connect to spacebrew
 		this.server.sb.connect(this.serverIp, this.name, this.description );
 	}
-	
 	
 }

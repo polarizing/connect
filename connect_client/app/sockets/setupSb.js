@@ -24,7 +24,6 @@ define('sockets/setupSb', ['sockets/sb'], function(sb) {
 
         // configure the publication and subscription feeds
         sb.addPublish("connect", "string", "");
-        sb.addPublish("beatNotation", "string", "");
         sb.addSubscribe("checkAlive", "boolean");
 
         // override Spacebrew events - this is how you catch events coming from Spacebrew

@@ -72,14 +72,14 @@ public class Grid {
 	 * @param p
 	 * @param x1
 	 * @param y1
-	 * @param x2
-	 * @param y2
+	 * @param width
+	 * @param height
 	 */
 	
-	public Grid (PApplet p, int x1, int y1, int x2, int y2) {
+	public Grid (PApplet p, float x1, float y1, float width, float height) {
 		this.parent = p;
-		this.gridContainer = new Container(x1, y1, x2, y2);
-		this.marginContainer = new Container(x1, y1, x2, y2);
+		this.gridContainer = new Container(x1, y1, width, height);
+		this.marginContainer = new Container(x1, y1, width, height);
 		this.topOffset = this.rightOffset = this.bottomOffset = this.leftOffset = 0;
 		this.rowPartition = this.columnPartition = 0;
 		this.init();
@@ -773,7 +773,7 @@ public class Grid {
 		// Draw column lines. Lines are always one less than the number
 		// of partitions. If there are three partitions, there are two
 		// gridlines.
-		this.parent.stroke(255, 255, 255);
+		this.parent.stroke(59, 48, 84);
 		this.parent.strokeWeight((float) 0.5);
 		for (float interval : this.columnIntervals) {
 			this.parent.line(interval, gridContainer.y1, interval, gridContainer.y2);
@@ -784,13 +784,15 @@ public class Grid {
 		}
 		
 		// Draw margin offsets
-		this.parent.stroke(this.parent.color(255, 0, 0));
-		this.parent.line(gridContainer.x1, gridContainer.y1 + this.topOffset, gridContainer.x2, gridContainer.y1 + this.topOffset);
-		this.parent.line(gridContainer.x1 + this.leftOffset, gridContainer.y1, gridContainer.x1 + this.leftOffset, gridContainer.y2);
-		this.parent.line(gridContainer.x1, gridContainer.y2 - this.bottomOffset, gridContainer.x2, gridContainer.y2 - this.bottomOffset);
-		this.parent.line(gridContainer.x2 - this.rightOffset, gridContainer.y1, gridContainer.x2 - this.rightOffset, gridContainer.y2);
-
-		this.parent.stroke(0, 0, 0);
+//		this.parent.stroke(this.parent.color(255, 0, 0));
+//		this.parent.line(gridContainer.x1, gridContainer.y1 + this.topOffset, gridContainer.x2, gridContainer.y1 + this.topOffset);
+//		this.parent.line(gridContainer.x1 + this.leftOffset, gridContainer.y1, gridContainer.x1 + this.leftOffset, gridContainer.y2);
+//		this.parent.line(gridContainer.x1, gridContainer.y2 - this.bottomOffset, gridContainer.x2, gridContainer.y2 - this.bottomOffset);
+//		this.parent.line(gridContainer.x2 - this.rightOffset, gridContainer.y1, gridContainer.x2 - this.rightOffset, gridContainer.y2);
+//
+//		this.parent.stroke(0, 0, 0);
+//		this.parent.fill(this.parent.color(209, 217, 213));
+//		this.parent.rect(gridContainer.x1, gridContainer.y1, gridContainer.width, gridContainer.height);
 	}
 	
 	/**
