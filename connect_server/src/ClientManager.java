@@ -83,7 +83,7 @@ public class ClientManager {
 		this.server.sb.send("checkAlive", true);
 		for (Client c : this.clients) {
 			c.setStartPing(this.server.millis());
-			if ( Math.abs(c.getPing()) > 8000) {
+			if ( Math.abs(c.getPing()) > 3000) {
 				parent.println(c.getPing());
 				c.setDisconnected();
 			}

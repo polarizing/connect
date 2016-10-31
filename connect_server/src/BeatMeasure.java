@@ -32,29 +32,25 @@ public class BeatMeasure {
 	
 	public void draw (Grid g, ArrayList<BeatMeasure> bm) {
 		
-		parent.println( this.server.soundM.getElapsedTime() );
+//		parent.println( this.server.soundM.getElapsedTime() );
 		
 		Container gc = g.getContainer();
 
 		Column c = g.getColumn(0);
-		this.server.pushMatrix();
-		this.server.translate(c.center.x, c.center.y, 0);
-		this.server.fill(255);
-		this.server.box(c.width, 20, 20);
-		this.server.popMatrix();
+//		this.server.pushMatrix();
+//		this.server.translate(c.center.x, c.center.y, 0);
+//		this.server.fill(255);
+//		this.server.box(c.width, 20, 20);
+//		this.server.popMatrix();
 				
 		float boxW = g.getColumnSize();
 		float boxH = 15;
 		float boxZ = 15;
 		
 		float timeDeltaOffset =  (float) ( this.server.soundM.getElapsedTime() * (boxW * 4));
-		parent.println(timeDeltaOffset);
 		float measureOffsetW = (bm.size() - 1 - this.measureId) * (boxW * 4) + timeDeltaOffset;
 		this.server.pushMatrix();
-//		this.server.stroke(255, 0, 0);
-//		this.server.noFill();
 		this.server.translate(gc.x2 - measureOffsetW - (boxW * 2), gc.center.y, 200);
-//		this.server.box(boxW * 4, gc.height, 200);
 		// inside the box
 		
 			for (BeatNote note : this.beats) {

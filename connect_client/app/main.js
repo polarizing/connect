@@ -1,36 +1,45 @@
-// Interface
-require(['interface/topMenu'], function () {
-
-})
-
 // Main App Logic
-require(['grid/Grid', 'sketch',  'sockets/setupSb', 'sockets/sb', 'config/Config'],function (Grid, sketch, setupSb, sb, config){
-	document.ontouchmove = function(event) {
-	    event.preventDefault();
-	}
+require(['grid/Grid', 'sketch', 'sockets/setupSb', 'sockets/sb', 'config/Config'], function(Grid, sketch, setupSb, sb, config) {
+    document.ontouchmove = function(event) {
+        event.preventDefault();
+    }
 
-	window.onload = setupSb(sb);
+    window.onload = setupSb(sb);
 
-	$('#connect').on('click', function () {
-		sb.send('connect', 'string', 'unregistered#' + random_id + '#null');
-		config.connected = true;
-		$(this).hide();
-	})
+    $('#join').on('click', function() {
+        $('#instruments').slideDown("slow");
+        $('#sub-text').hide();
+    })
 
-	$('#selectInstrument').on('click', function() {
-		sb.send('connect', 'string', 'instrument#' + random_id + '#' + $( "#instrument" ).val() );
-		$(this).hide();
-				$('#instrument-container').hide();
+    $('.instrument').on('click', function() {
 
-		$('canvas').show();
-	})
+        // connect
+        sb.send('connect', 'string', 'unregistered#' + random_id + '#null');
+        config.connected = true;
 
-	// var grid = new Grid();
-	// console.log(grid);
+        var instrument = $(this).data('instrument');
+        config.instrument = instrument;
 
-	var myp5 = new p5(sketch, 'p5sketch');
+        sb.send('connect', 'string', 'instrument#' + random_id + '#' + instrument);
+        $('.container').hide();
+        $('canvas').show();
+    })
 
-	console.log(myp5);
-	// $('#update').text('hi');
+    // $('#connect').on('click', function () {
+    //  sb.send('connect', 'string', 'unregistered#' + random_id + '#null');
+    //  config.connected = true;
+    //  $(this).hide();
+    // })
+
+    $('#selectInstrument').on('click', function() {
+        sb.send('connect', 'string', 'instrument#' + random_id + '#' + $("#instrument").val());
+        $(this).hide();
+        $('#instrument-container').hide();
+
+        $('canvas').show();
+    })
+
+    var myp5 = new p5(sketch, 'p5sketch');
+
 
 });

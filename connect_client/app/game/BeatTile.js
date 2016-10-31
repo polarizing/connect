@@ -51,7 +51,12 @@ define(['config/Colors', 'config/Config'], function(Colors, Config) {
         // draw shadows
         if (!this.active) {
 
-        sketch.fill('rgb(254, 143, 67)');
+        if (Config.currentBeat == this.columnIdx) {
+            // sketch.fill('rgb(254, 160, 93)');
+            sketch.fill('rgb(254, 172, 113)');
+        } else {
+            sketch.fill('rgb(254, 143, 67)');
+        }
 
         sketch.rect(this.x1 + margin, this.y1 + margin, this.width - margin * 2, this.height - margin * 2, 3, 3, 3, 3);
 

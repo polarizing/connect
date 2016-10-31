@@ -22,6 +22,7 @@ public class SocketManager {
 	public void init() {
 		// declare your publishers
 		this.server.sb.addPublish("checkAlive", "boolean", "true");
+		this.server.sb.addPublish("notePlayed", "string", "");
 		// declare your subscribers
 		this.server.sb.addSubscribe("connect", "string");
 		// connect to spacebrew

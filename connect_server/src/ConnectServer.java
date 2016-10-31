@@ -3,6 +3,8 @@ import processing.core.PImage;
 import processing.core.PVector;
 import peasy.*;
 import ddf.minim.*;
+import de.looksgood.ani.*;
+import de.voidplus.leapmotion.*;
 
 import java.util.List;
 import java.util.Random;
@@ -39,10 +41,17 @@ public class ConnectServer extends PApplet{
 	
 	/** PeasyCam **/
 	public PeasyCam cam;
+	public boolean freeCam;
 	
 	/** Minim **/
 	public Minim minim;
 	public AudioPlayer song;
+	
+	/** CAM VALUES **/
+	public float rotateX = 0;
+	public float rotateY = 0;
+	public float rotateZ = 0;
+	public float distance = 1500;
 	
 	/** Spacebrew Sockets **/
 	public Spacebrew sb;
@@ -64,6 +73,9 @@ public class ConnectServer extends PApplet{
 	/** Socket Manager **/
 	public SocketManager socketM;
 	
+	/** LEAPMOTION **/
+	public LeapMotion leap;
+
 	/** Drawing! **/
 	/** Stars **/
 	public List<Star> stars;
@@ -120,10 +132,13 @@ public class ConnectServer extends PApplet{
 		this.socketM = new SocketManager(this);
 		
 		// Initialize PeasyCam
-		cam = new PeasyCam(this, width / 2, height / 2, 0, 2000);
-		cam.setMinimumDistance(.001);
-		cam.setMaximumDistance(50000);
-		
+		this.cam = new PeasyCam(this, width / 2, height / 2, 0, 2000);
+		this.cam.setMinimumDistance(.001);
+		this.cam.setMaximumDistance(5000);
+		this.freeCam = true;
+//		cam.setYawRotationMode();   // like spinning a globe
+//		cam.setPitchRotationMode();   // like spinning a globe
+
 		// Initialize and Setup Grid
 		this.grid = new Grid(this, 0, 0, width, height);
 		this.grid.setOffsets(new int[]{marginOffset, marginOffset, marginOffset, marginOffset}).setPartitions(new int[]{numRows, numColumns});
@@ -131,6 +146,8 @@ public class ConnectServer extends PApplet{
 		// Initialize Grid Animator
 		this.gridAnimator = new GridAnimator(this);
 		
+		// Initialize Leap Motion
+		this.leap = new LeapMotion(this).allowGestures();  // All gestures
 		// Initialize Stars
 		this.stars = new ArrayList<Star>();
 		  for (int x = 0; x < 100; x++) {
@@ -155,14 +172,15 @@ public class ConnectServer extends PApplet{
 			     stars.add( s );
 			  }
 		  
+
 		// Load Background
-		 bg = loadImage("assets/bg2.jpg");
-		 bg.resize(width, height);
+//		 bg = loadImage("assets/bg2.jpg");
+//		 bg.resize(width, height);
 		frameRate(120);
 		print ("Loading sounds ...");
 //		delay(6000);
 		print ("Setup finished.\n");
-
+		Ani.init(this);
 	}
 	
 	public int getRandomWithExclusion(Random rnd, int start, int end, int... exclude) {
@@ -183,10 +201,23 @@ public class ConnectServer extends PApplet{
 			// Draw Background
 //		background(0, 194, 178);
 		  background(23, 12, 48);
-		  this.cam.beginHUD();
+		  
+		  
+		  
+		if (!freeCam) {
+			  cam.setRotations(rotateX, rotateY, rotateZ);
+		  }
+
+		this.cam.beginHUD();
 //		  setGradient(0, height / 2, width, height / 2, color(100, 100, 100), color(21, 30, 26), 1);
 //		  setGradient(0, 0, width, height / 2, color(22, 33, 30), color(22, 33, 30), 1);
-		  
+		  for (Hand hand : leap.getHands ()) {
+			  Finger fingerIndex = hand.getIndexFinger();
+			  stroke(255);
+			  fill(255);
+			  ellipse(fingerIndex.getPosition().x, fingerIndex.getPosition().y, 30, 30);
+//			  hand.draw();
+		  }
 		  this.cam.endHUD();
 
 		  this.cam.beginHUD();
@@ -259,6 +290,8 @@ public class ConnectServer extends PApplet{
 		  }
 		}
 	
+	/** SPACEBREW **/
+	
 	public void onBooleanMessage( String name, boolean value ){
 		println("got bool message " + name + " : " + value); 
 		
@@ -289,6 +322,156 @@ public class ConnectServer extends PApplet{
 				this.clientM.setClientInstrument(id, data);
 			}
 		} 
+	}
+	
+
+
+public void leapOnCircleGesture(CircleGesture g, int state){
+  int     id               = g.getId();
+  Finger  finger           = g.getFinger();
+  PVector positionCenter   = g.getCenter();
+  float   radius           = g.getRadius();
+  float   progress         = g.getProgress();
+  long    duration         = g.getDuration();
+  float   durationSeconds  = g.getDurationInSeconds();
+  int     direction        = g.getDirection();
+
+  switch(state){
+    case 1: // Start
+      break;
+    case 2: // Update
+      break;
+    case 3: // Stop
+      println("CircleGesture: " + id);
+      break;
+  }
+  
+  
+  
+//  for (Hand hand : leap.getHands ()) {
+////	  stroke(255);
+////	  fill(255);
+////	  hand.draw();
+////	  
+//	  ArrayList<Finger> fingers = hand.getOutstretchedFingers();
+////	  println(hand.toString());
+//	  if (hand.isLeft()) {
+//		  println("Hand");
+//		  println(hand.getOutstretchedFingers().size());		  
+//	  }
+//	  
+//  }
+  
+  int quadrant = getQuadrant(positionCenter);
+  
+  if (state == 1) {
+	  if (direction == 0) {
+		  switch (quadrant) {
+		  	case 1: Ani.to(this, (float) 4.0, "rotateX", (float) 1.25);
+					Ani.to(this, (float) 4.0, "rotateY", (float) -1.09);
+					Ani.to(this, (float) 4.0, "rotateZ", (float) 2.86);
+					break;
+		  	case 2: Ani.to(this, (float) 3.0, "rotateX", (float) -1.17);
+		  			Ani.to(this, (float) 3.0, "rotateY", (float) 1.01);
+		  			Ani.to(this, (float) 3.0, "rotateZ", (float) -0.28);
+		  			break;
+		  	case 3: Ani.to(this, (float) 4.0, "rotateX", (float) 1.25);
+					Ani.to(this, (float) 4.0, "rotateY", (float) -1.09);
+					Ani.to(this, (float) 4.0, "rotateZ", (float) 2.86);
+					break;
+		  	case 4: Ani.to(this, (float) 3.0, "rotateX", (float) -1.17);
+					Ani.to(this, (float) 3.0, "rotateY", (float) 1.01);
+					Ani.to(this, (float) 3.0, "rotateZ", (float) -0.28);
+					break;
+		  }
+	  } else if (direction == 1) {
+		  switch (quadrant) {
+		  	case 1: Ani.to(this, (float) 4.0, "rotateX", (float) -0.04);
+		  			Ani.to(this, (float) 4.0, "rotateY", (float) -1.33);
+		  			Ani.to(this, (float) 4.0, "rotateZ", (float) 1.49);
+		  			break;
+		  	case 2: Ani.to(this, (float) 3.0, "rotateX", (float) -2.06);
+			Ani.to(this, (float) 3.0, "rotateY", (float) 2.22);
+			Ani.to(this, (float) 3.0, "rotateZ", (float) 0.36);
+		  			break;
+		  	case 3: Ani.to(this, (float) 4.0, "rotateX", (float) -0.04);
+					Ani.to(this, (float) 4.0, "rotateY", (float) -1.33);
+					Ani.to(this, (float) 4.0, "rotateZ", (float) 1.49);
+					break;
+		  	case 4: Ani.to(this, (float) 3.0, "rotateX", (float) -2.06);
+					Ani.to(this, (float) 3.0, "rotateY", (float) 2.22);
+					Ani.to(this, (float) 3.0, "rotateZ", (float) 0.36);
+					break;
+					  // -2.06, 2.22, 0.36
+
+		  }
+	  }
+  }
+  
+  
+}
+
+public void leapOnKeyTapGesture(KeyTapGesture g){
+	  int     id               = g.getId();
+	  Finger  finger           = g.getFinger();
+	  PVector position         = g.getPosition();
+	  PVector direction        = g.getDirection();
+	  long    duration         = g.getDuration();
+	  float   durationSeconds  = g.getDurationInSeconds();
+
+	  println("KeyTapGesture: " + id);
+	}
+
+	public int getQuadrant(PVector point) {
+		if (point.x < width / 2 && point.y < height / 2) {
+			return 1;			
+		}
+		else if (point.x > width / 2 && point.y < height / 2) {
+			return 2;
+		}
+		else if (point.x < width / 2 && point.y > height / 2) {
+			return 3;
+		}
+		else {
+			return 4;
+		}
+	}
+
+	
+	public void keyPressed() {
+		if (key == 'f') {
+			freeCam = !freeCam;
+		}
+		if (key == '0') {
+		    Ani.to(this, (float) 3.0, "rotateX", (float) 0);
+		    Ani.to(this, (float) 3.0, "rotateY", (float) 0);
+		    Ani.to(this, (float) 3.0, "rotateZ", (float) 0);
+		}
+		if (key == '1') {
+		    Ani.to(this, (float) 3.0, "rotateX", (float) -1.17);
+		    Ani.to(this, (float) 3.0, "rotateY", (float) 1.01);
+		    Ani.to(this, (float) 3.0, "rotateZ", (float) -0.28);
+		    // zoom out
+		}
+		if (key == '2') {
+		    Ani.to(this, (float) 3.0, "rotateX", (float) -1.97);
+		    Ani.to(this, (float) 3.0, "rotateY", (float) 1.25);
+		    Ani.to(this, (float) 3.0, "rotateZ", (float) 0.36);
+		    // zoom in
+
+		}
+		if (key == '3') {
+		    Ani.to(this, (float) 4.0, "rotateX", (float) 1.25);
+		    Ani.to(this, (float) 4.0, "rotateY", (float) -1.09);
+		    Ani.to(this, (float) 4.0, "rotateZ", (float) 2.86);
+		}
+		if (key == '4') {
+		    Ani.to(this, (float) 4.0, "rotateX", (float) -0.04);
+		    Ani.to(this, (float) 4.0, "rotateY", (float) -1.33);
+		    Ani.to(this, (float) 4.0, "rotateZ", (float) 1.49);
+		}
+
+		
 	}
 	
 	public void mousePressed(){

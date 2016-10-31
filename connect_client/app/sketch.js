@@ -1,4 +1,4 @@
-define(['grid/Grid', 'sockets/sb', 'game/BeatTile', 'game/PitchTile', 'game/PitchController', 'game/BeatController', 'config/Colors', 'interface/topMenu'], function(Grid, sb, BeatTile, PitchTile, PitchController, BeatController, Colors, topMenu) {
+define(['grid/Grid', 'sockets/sb', 'game/BeatTile', 'game/PitchTile', 'game/PitchController', 'game/BeatController', 'game/ClientInfoController', 'config/Colors', 'interface/topMenu'], function(Grid, sb, BeatTile, PitchTile, PitchController, BeatController, ClientInfoController, Colors, topMenu) {
     var s = function(sketch) {
 
         var pitchGrid1;
@@ -16,6 +16,11 @@ define(['grid/Grid', 'sockets/sb', 'game/BeatTile', 'game/PitchTile', 'game/Pitc
             sketch.sfRegular = sketch.loadFont('/app/assets/sfRegular.ttf');
             sketch.sfUltraLight = sketch.loadFont('/app/assets/sfUltraLight.ttf');
             sketch.glowingImg = sketch.loadImage('/app/assets/glowing.png');
+            sketch.bassSynth = sketch.loadImage('/app/assets/bass-synth.png');
+            sketch.harpsichord = sketch.loadImage('/app/assets/harpsichord.png');
+            sketch.pluckedSynth = sketch.loadImage('/app/assets/plucked-synth.png');
+            sketch.marimba = sketch.loadImage('/app/assets/marimba.png');
+            sketch.orientation = sketch.loadImage('/app/assets/rotate.png');
         }
 
         sketch.setup = function() {
@@ -26,20 +31,28 @@ define(['grid/Grid', 'sockets/sb', 'game/BeatTile', 'game/PitchTile', 'game/Pitc
             sketch.createCanvas(sketch.windowWidth, sketch.windowHeight);
 
             // Creating pitch grids
-            pitchGrid1 = new Grid(sketch, 0, 0, sketch.width * 0.20, sketch.height);
-            pitchGrid1.setOffsets({ top: 65, right: 10, bottom: 20, left: 20 });
+            pitchGrid1 = new Grid(sketch, 0, sketch.height * 0.10, sketch.width * 0.40, sketch.height);
+            pitchGrid1.setOffsets({ top: 65, right: 20, bottom: 20, left: 20 });
             pitchGrid1.setPartitions({ row: 8, column: 1 });
 
-            pitchGrid2 = new Grid(sketch, sketch.width * 0.20, 0, sketch.width * 0.4, sketch.height)
-            pitchGrid2.setOffsets({ top: 65, right: 20, bottom: 20, left: 10 });
-            pitchGrid2.setPartitions({ row: 8, column: 1 });
+
+            infoGrid1 = new Grid(sketch, 0, 0, sketch.width * 0.4, sketch.height * 0.1 + 10)
+            infoGrid1.setOffsets({ top: 65, right: 20, bottom: 0, left: 20 });
+            infoGrid1.setPartitions({ row: 1, column: 1 });
+
+
+            // clientInfoGrid = new Grid(sketch, sketch.width * 0.20, 0, sketch.width * 0.4, sketch.height * 0.5)
+            // clientInfoGrid.setOffsets({ top: 65, right: 20, bottom: 20, left: 10 });
+            // clientInfoGrid.setPartitions({ row: 8, column: 1 });
+
 
             // Create pitch controllers using pitch grids as starting point
             pitchCtrl1 = new PitchController(1, pitchGrid1);
-            pitchCtrl2 = new PitchController(2, pitchGrid2);
+            // pitchCtrl2 = new PitchController(2, pitchGrid2);
+            infoCtrl1 = new ClientInfoController(infoGrid1);
 
             // Creating beatmaker grids
-            beatmakerGrid = new Grid(sketch, sketch.width * 0.4, 0, sketch.width, sketch.height);
+            beatmakerGrid = new Grid(sketch, sketch.width * 0.40, 0, sketch.width, sketch.height);
             beatmakerGrid.setOffsets({ top: 10, right: 10, bottom: 10, left: 10 });
             beatmakerGrid.setPartitions({ row: 4, column: 4 });
 
@@ -55,12 +68,20 @@ define(['grid/Grid', 'sockets/sb', 'game/BeatTile', 'game/PitchTile', 'game/Pitc
             beatCtrl.resize(beatmakerGrid);
 
             // Resize pitch controllers
-            pitchGrid1.setGrid(0, 0, sketch.width * 0.2, sketch.height);
-            pitchGrid2.setGrid(sketch.width * 0.2, 0, sketch.width * 0.4, sketch.height);
+            pitchGrid1.setGrid(0, sketch.height * 0.10, sketch.width * 0.40, sketch.height);
+            // pitchGrid2.setGrid(sketch.width * 0.2, sketch.height * 0.4, sketch.width * 0.4, sketch.height);
+            infoGrid1.setGrid(0, 0, sketch.width * 0.4, sketch.height * 0.1 + 10);
 
             // Resize pitch controllers and grid system
             pitchCtrl1.resize(pitchGrid1);
-            pitchCtrl2.resize(pitchGrid2);
+            infoCtrl1.resize(infoGrid1);
+            // pitchCtrl2.resize(pitchGrid2);
+
+            // Resize client info controller
+            // clientInfoGrid.setGrid(sketch.width * 0.20, 0, sketch.width * 0.4, sketch.height * 0.5)
+            // clientInfoCtrl.resize(clientInfoGrid);
+
+
         }
 
         function doOnOrientationChange() {
@@ -91,28 +112,41 @@ define(['grid/Grid', 'sockets/sb', 'game/BeatTile', 'game/PitchTile', 'game/Pitc
         }
 
         sketch.draw = function() {
+
             sketch.background(63, 63, 63);
 
-            // Left Side of Application
-            // Pitch Controller 1
-            pitchCtrl1.draw(sketch);
-            // Pitch Controller 2s
-            pitchCtrl2.draw(sketch);
+            // If in Portrait Mode
+            if (sketch.height > sketch.width) {
+                sketch.image(sketch.orientation, 0, 0, sketch.orientation.width, sketch.orientation.height, 0, 0, sketch.width, sketch.height)
 
-            // Right Side of Application
-            beatCtrl.draw(sketch);
+            } else {
 
-            // Logging
-            sketch.fill(255);
-            sketch.text('X: ' + sketch.touchX + ' Y: ' + sketch.touchY, 40, 15);
+                // Left Side of Application
+                // Pitch Controller 1
+                pitchCtrl1.draw(sketch);
+                infoCtrl1.draw(sketch);
+                // Pitch Controller 2s
+                // pitchCtrl2.draw(sketch);
 
-            var fps = sketch.frameRate();
-            sketch.text("FPS: " + fps.toFixed(2), 40, sketch.height - 10);
+                // clientInfoCtrl.draw(sketch);
 
-            // Debugging
-            // pitchGrid1.draw({ column: true, row: true, margin: true, color: { lines: "rgb(0, 0, 0)", margin: 'rgb(255, 0, 0)' } });
-            // pitchGrid2.draw({ column: true, row: true, margin: true, color: { lines: "rgb(0, 0, 0)", margin: 'rgb(255, 0, 0)' } });
-            // beatmakerGrid.draw({ column: true, row: true, margin: true, color: { lines: "rgb(0, 0, 0)", margin: 'rgb(255, 0, 0)' } })
+                // Right Side of Application
+                beatCtrl.draw(sketch);
+
+                // Logging
+                // sketch.fill(255);
+                // sketch.text('X: ' + sketch.touchX + ' Y: ' + sketch.touchY, 40, 15);
+
+                // var fps = sketch.frameRate();
+                // sketch.text("FPS: " + fps.toFixed(2), 40, sketch.height - 10);
+
+                // Debugging
+                // pitchGrid1.draw({ column: true, row: true, margin: true, color: { lines: "rgb(0, 0, 0)", margin: 'rgb(255, 0, 0)' } });
+                // infoGrid1.draw({ column: true, row: true, margin: true, color: { lines: "rgb(0, 0, 0)", margin: 'rgb(255, 0, 0)' } });
+                // beatmakerGrid.draw({ column: true, row: true, margin: true, color: { lines: "rgb(0, 0, 0)", margin: 'rgb(255, 0, 0)' } })
+
+            }
+
 
         };
 
@@ -131,13 +165,6 @@ define(['grid/Grid', 'sockets/sb', 'game/BeatTile', 'game/PitchTile', 'game/Pitc
             if (pitchCtrl1Updated) {
                 var melodyPitch = pitchCtrl1.getNotation();
                 sb.send('connect', 'string', "melody#" + random_id + "#" + melodyPitch);
-            }
-
-            var pitchCtrl2Updated = pitchCtrl2.update(sketch.touchX, sketch.touchY);
-            
-            if (pitchCtrl2Updated) {
-                var refrainPitch = pitchCtrl2.getNotation();
-                sb.send('connect', 'string', "refrain#" + random_id + "#" + refrainPitch);
             }
 
         }

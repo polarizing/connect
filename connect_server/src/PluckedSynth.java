@@ -20,8 +20,12 @@ public class PluckedSynth {
 		this.nm.play(index, 7);
 	}
 	
-	public void playSound(int index, float gain) {
-		this.nm.play(index, 7 + gain);
+//	public void playSound(int index, float lowPass) {
+//		this.nm.play(index, 7 + gain);
+//	}
+	
+	public void addEffect (int index, float lowPass, float highpass) {
+		this.nm.addEffect(index, lowPass, highpass);
 	}
 	
 	public String toString() {

@@ -84,9 +84,7 @@ define(['config/Colors', 'config/Config', 'game/PitchTile'], function(Colors, Co
         sketch.textFont(sketch.sfRegular);
         sketch.textSize(14);
         if (this.controllerId == 1) {
-            sketch.text('Harmony', (this.x1 + 10), (this.y1 + this.y1 + 30) / 2);
-        } else if (this.controllerId == 2) {
-            sketch.text('Refrain', (this.x1 + 10), (this.y1 + this.y1 + 30) / 2);
+            sketch.text('Pitch', (this.x1 + 10), (this.y1 + this.y1 + 30) / 2);
         }
     }
 

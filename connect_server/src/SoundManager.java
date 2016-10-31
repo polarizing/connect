@@ -13,7 +13,10 @@ public class SoundManager {
 	private PApplet parent;
 	private ConnectServer server;
 	
-	public AudioPlayer bgTrack;
+	public Sample bgTrack;
+	
+	public float lowPassVal = 200;
+	public float highPassVal = 800;
 	
 	/**
 	 * Managing Time (4/4)
@@ -90,7 +93,8 @@ public class SoundManager {
 		pluckedSynth = new PluckedSynth(this.parent);
 		organ = new Organ(this.parent);
 		steelDrum = new SteelDrum (this.parent);
-		this.bgTrack = this.server.minim.loadFile("audios/drums/simplerBeat.mp3");
+		this.bgTrack = new Sample(this.parent, this.server.minim.loadSample("audios/drums/simplerBeat.mp3"));
+
 	}
 	
 	public void playInstrument (String instrument, int pitch) {
@@ -101,9 +105,11 @@ public class SoundManager {
 			bassSynth.playSound(pitch);
 		}
 		else if (instrument.equals("harpsichord")) {
+//			harpsichord.addEffect(pitch, this.lowPassVal, this.highPassVal);
 			harpsichord.playSound(pitch);
 		}
 		else if (instrument.equals("pluckedSynth")) {
+//			pluckedSynth.addEffect(pitch, this.lowPassVal, this.highPassVal);
 			pluckedSynth.playSound(pitch);
 		}
 		else if (instrument.equals("organ")) {
@@ -129,14 +135,16 @@ public class SoundManager {
 		bgElapsedTime = (currTime - bgPrevTime) / 1000.0;
 		
 		if (elapsedTime >= (noteAverageSpeed / 4) * 1 - 0.25 && !noteOnePlayed) {
-			parent.println("hi");
 			noteReset = false;
+
+			this.server.sb.send("notePlayed", "0");
 
 			if (bgElapsedTime > 3.99) {
 				bgPrevTime = currTime;
-				this.bgTrack.rewind();
-				this.bgTrack.setGain(-10);
-				this.bgTrack.play();
+//				this.bgTrack.setEffects(this.lowPassVal, this.highPassVal);
+				this.bgTrack.play(-12);
+//				this.bgTrack.setGain(-12); // originally -10
+//				this.bgTrack.play();
 			}
 			
 			for (Client c : clients) {
@@ -172,8 +180,7 @@ public class SoundManager {
 		}
 		
 		if (elapsedTime >= (noteAverageSpeed / 4) * 2 - 0.25 && !noteTwoPlayed) {
-			parent.println("hi2");
-
+			this.server.sb.send("notePlayed", "1");
 			for (Client c : clients) {
 				String instrument = c.getInstrument();
 				String rhythm = c.getRhythm();
@@ -199,7 +206,8 @@ public class SoundManager {
 		}
 		
 		if (elapsedTime >= (noteAverageSpeed / 4) * 3 - 0.25 && !noteThreePlayed) {
-	
+			this.server.sb.send("notePlayed", "2");
+
 			for (Client c : clients) {
 				String instrument = c.getInstrument();
 				String rhythm = c.getRhythm();
@@ -226,6 +234,7 @@ public class SoundManager {
 		}
 		
 		if (elapsedTime >= (noteAverageSpeed / 4) * 4 - 0.25 && !noteFourPlayed) {
+			this.server.sb.send("notePlayed", "3");
 
 			for (Client c : clients) {
 				String instrument = c.getInstrument();
@@ -254,6 +263,7 @@ public class SoundManager {
 		}
 		
 		if (elapsedTime >= (noteAverageSpeed / 4) * 4 && !noteReset) {
+			
 			for (Client c : clients) {
 				// Reset time interval.
 				prevTime = currTime;

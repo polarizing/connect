@@ -18,6 +18,10 @@ public class Marimba {
 
 	}
 
+	public void addEffect (int index, float lowPass, float highPass) {
+		this.nm.addEffect(index, lowPass, highPass);
+	}
+	
 	public void playSound(int index) {
 		this.nm.play(index, 0);
 	}

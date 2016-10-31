@@ -1,4 +1,6 @@
-define('sockets/setupSb', ['sockets/sb'], function(sb) {
+ define(['sockets/sb', 'config/Config'], function(sb, Config) {
+
+
 
     // Spacebrew Object
     // var sb = sb;
@@ -25,9 +27,11 @@ define('sockets/setupSb', ['sockets/sb'], function(sb) {
         // configure the publication and subscription feeds
         sb.addPublish("connect", "string", "");
         sb.addSubscribe("checkAlive", "boolean");
+        sb.addSubscribe("notePlayed", "string");
 
         // override Spacebrew events - this is how you catch events coming from Spacebrew
         sb.onBooleanMessage = onBooleanMessage;
+        sb.onStringMessage = onStringMessage;
         sb.onOpen = onOpen;
 
         // connect to spacbrew
@@ -87,6 +91,12 @@ define('sockets/setupSb', ['sockets/sb'], function(sb) {
         }
     }
 
+    function onStringMessage(name, value) {
+        console.log("[onStringMessage] string message received ", value);
+        Config.currentBeat = value;
+        // if (name == "notePlayed") {
+        // }
+    }
     return setup;
 
 })

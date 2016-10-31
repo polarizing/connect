@@ -46,47 +46,36 @@ public class GUIManager implements ControlListener{
 				     .plugTo(this)
 				     ;
 		  
-//		n1 = this.cp5.addSlider("noteOneTime")
-//	     .setPosition(menuX, 50)
-//	     .setRange(0, 4) // values can range from big to small as well
-//	     .setValue((float) 0.25)
-//	     .setNumberOfTickMarks(17)
-//	     .plugTo(this)
-//	     ;
-//		
-//		n2 = this.cp5.addSlider("noteTwoTime")
-//			     .setPosition(menuX, 75)
-//			     .setRange(0, 4) // values can range from big to small as well
-//			     .setValue((float) 0.50)
-//			     .setNumberOfTickMarks(17)
-//			     .plugTo(this)
-//			     ;
-//		n3 = this.cp5.addSlider("noteThreeTime")
-//			     .setPosition(menuX, 100)
-//			     .setRange(0, 4) // values can range from big to small as well
-//			     .setValue((float) 0.75)
-//			     .setNumberOfTickMarks(17)
-//
-//			     .plugTo(this)
-//			     ;
-//		n4 = this.cp5.addSlider("noteFourTime")
-//			     .setPosition(menuX, 125)
-//			     .setRange(0, 4) // values can range from big to small as well
-//			     .setValue((float) 1.0)
-//			     .setNumberOfTickMarks(17)
-//			     .plugTo(this)
-//			     ;
+		n1 = this.cp5.addSlider("rotateX")
+	     .setPosition(menuX, 50)
+	     .setRange(-4, 4) // values can range from big to small as well
+	     .plugTo(this)
+	     ;
+		
+		n2 = this.cp5.addSlider("rotateY")
+			     .setPosition(menuX, 75)
+			     .setRange(-4, 4) // values can range from big to small as well
+			     .plugTo(this)
+			     ;
+		n3 = this.cp5.addSlider("rotateZ")
+			     .setPosition(menuX, 100)
+			     .setRange(-4, 4) // values can range from big to small as well
+			     .plugTo(this)
+			     ;
+		n4 = this.cp5.addSlider("lowPassVal")
+			     .setPosition(menuX, 125)
+			     .setRange(0, 2000) // values can range from big to small as well
+			     .plugTo(this)
+			     ;
 //		  this.parent.println("here:" + this.server.numClients);
 		  
 		  
 
-//		s2 = this.cp5.addSlider("numColumns")
-//		.setPosition(menuX, 150)
-//	     .setRange(1, 50) // values can range from big to small as well
-//	     .plugTo(this)
-//	     ;
-//		  this.parent.println("here:" + this.server.numColumns);
-
+		s2 = this.cp5.addSlider("highPassVal")
+			     .setPosition(menuX, 150)
+			     .setRange(0, 2000) // values can range from big to small as well
+			     .plugTo(this)
+			     ;
 //		s3 = this.cp5.addSlider("numRows")
 //		.setPosition(menuX, 175)
 //	     .setWidth(100)
@@ -143,21 +132,24 @@ public class GUIManager implements ControlListener{
 		  this.parent.hint(this.parent.ENABLE_DEPTH_TEST);
 	}
 	
-	public void noteOneTime(float theValue) {
+	public void rotateX(float theValue) {
 		parent.println(theValue);
-		this.server.soundM.noteOneTime = theValue;
+		this.server.rotateX = theValue;
 	}
-	public void noteTwoTime(float theValue) {
+	public void rotateY(float theValue) {
 		parent.println(theValue);
-		this.server.soundM.noteTwoTime = theValue;
+		this.server.rotateY = theValue;
 	}
-	public void noteThreeTime(float theValue) {
+	public void rotateZ(float theValue) {
 		parent.println(theValue);
-		this.server.soundM.noteThreeTime = theValue;
+		this.server.rotateZ = theValue;
 	}
-	public void noteFourTime(float theValue) {
-		parent.println(theValue);
-		this.server.soundM.noteFourTime = theValue;
+	public void lowPassVal(float theValue) {
+		this.server.soundM.lowPassVal = theValue;
+	}
+	
+	public void highPassVal(float theValue) {
+		this.server.soundM.highPassVal = theValue;
 	}
 //	
 	public void numClients(int theValue) {

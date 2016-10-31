@@ -24,6 +24,10 @@ public class Harpsichord {
 		this.nm.play(index, -12 + gain);
 	}
 	
+	public void addEffect (int index, float lowPass, float highPass) {
+		this.nm.addEffect(index, lowPass, highPass);
+	}
+	
 	public String toString() {
 		return "A harpsichord instrument";
 	}

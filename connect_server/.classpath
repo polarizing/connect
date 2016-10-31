@@ -35,5 +35,7 @@
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="/Users/fullstack/Downloads/leap-motion-processing-master/library/macosx"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="Arduino.jar"/>
+	<classpathentry kind="lib" path="Ani.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

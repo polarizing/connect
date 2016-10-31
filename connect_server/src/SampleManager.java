@@ -35,6 +35,10 @@ public class SampleManager {
 		}
 	}
 	
+	public void addEffect (int index, float lowPass, float highpass) {
+		samples[index].setEffects(lowPass, highpass);
+	}
+	
 	public void play (int index, float gain) {
 		samples[index].play(gain);
 	}
